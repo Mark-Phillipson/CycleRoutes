@@ -18,6 +18,10 @@ public static class MauiProgram
 
         // Add device-specific services used by the CycleRoutes.Shared project
         builder.Services.AddSingleton<IFormFactor, FormFactor>();
+        
+        // Add route and street view services for MAUI
+        builder.Services.AddScoped<IRouteService, RouteService>();
+        builder.Services.AddScoped<IStreetViewService, StreetViewService>();
 
         builder.Services.AddMauiBlazorWebView();
 

@@ -15,9 +15,9 @@ builder.Services.AddHttpClient();
 // Add device-specific services used by the CycleRoutes.Shared project
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
 
-// Add route and street view services
-builder.Services.AddSingleton<IRouteService, RouteService>();
-builder.Services.AddSingleton<IStreetViewService, StreetViewService>();
+// Add route and street view services with appropriate lifetimes
+builder.Services.AddScoped<IRouteService, RouteService>();
+builder.Services.AddScoped<IStreetViewService, StreetViewService>();
 builder.Services.AddSingleton<ApiKeyTester>();
 
 var app = builder.Build();

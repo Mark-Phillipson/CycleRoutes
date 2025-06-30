@@ -10,8 +10,8 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 // Add device-specific services used by the CycleRoutes.Shared project
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
 
-// Add route and street view services for client-side
-builder.Services.AddSingleton<IRouteService, RouteService>();
-builder.Services.AddSingleton<IStreetViewService, StreetViewService>();
+// Add route and street view services for client-side with appropriate lifetimes
+builder.Services.AddScoped<IRouteService, RouteService>();
+builder.Services.AddScoped<IStreetViewService, StreetViewService>();
 
 await builder.Build().RunAsync();
