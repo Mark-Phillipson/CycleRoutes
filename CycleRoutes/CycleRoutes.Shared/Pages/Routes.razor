@@ -1,4 +1,5 @@
 @page "/routes"
+@rendermode InteractiveServer
 @inject IRouteService RouteService
 @inject IStreetViewService StreetViewService
 @inject IJSRuntime JSRuntime
@@ -49,7 +50,7 @@
                                         <div>
                                             <strong>@route.Name</strong><br>
                                             <small class="text-muted">
-                                                @((route.TotalDistance / 1000).ToString("F1")) km • @route.Points.Count points
+                                                @((route.TotalDistance / 1000).ToString("F1")) km (@((route.TotalDistance / 1000 * 0.621371).ToString("F1")) mi) • @route.Points.Count points
                                             </small>
                                         </div>
                                         <div>
@@ -80,9 +81,15 @@
                         <h6>Current Route: @currentRoute.Name</h6>
                     </div>
                     <div class="card-body">
-                        <p><strong>Distance:</strong> @((currentRoute.TotalDistance / 1000).ToString("F1")) km</p>
+                        <p><strong>Distance:</strong> @((currentRoute.TotalDistance / 1000).ToString("F1")) km (@((currentRoute.TotalDistance / 1000 * 0.621371).ToString("F1")) mi)</p>
                         <p><strong>Points:</strong> @currentRoute.Points.Count</p>
                         <p><strong>Est. Duration:</strong> @currentRoute.EstimatedDuration.ToString(@"hh\:mm")</p>
+                        
+                        @if (currentRoute.Points.Count > 1)
+                        {
+                            var avgStepDistance = currentRoute.TotalDistance / (currentRoute.Points.Count - 1);
+                            <p><strong>Avg Step Distance:</strong> @(avgStepDistance.ToString("F1")) m (@((avgStepDistance * 3.28084).ToString("F1")) ft)</p>
+                        }
                         
                         <div class="d-grid gap-2">
                             <button class="btn btn-success" @onclick="StartRoute" disabled="@isNavigating">
@@ -106,7 +113,63 @@
                                         @currentPointIndex / @currentRoute.Points.Count
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-between mt-2">
+                                
+                                <!-- Auto-advance settings -->
+                                <div class="mt-3 p-3 bg-light rounded">
+                                    <h6 class="mb-3">Auto-advance Settings</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="autoAdvanceInterval" class="form-label">Interval (seconds)</label>
+                                            <input type="number" class="form-control form-control-sm" id="autoAdvanceInterval" 
+                                                   @bind="autoAdvanceIntervalSeconds" min="1" max="60" step="1" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="autoAdvanceDirection" class="form-label">Direction</label>
+                                            <select class="form-select form-select-sm" id="autoAdvanceDirection" @bind="autoAdvanceDirection">
+                                                <option value="forward">Forward</option>
+                                                <option value="reverse">Reverse</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 d-flex gap-2">
+                                        @if (!isAutoAdvancing)
+                                        {
+                                            <button class="btn btn-sm btn-success" @onclick="StartAutoAdvance">
+                                                <i class="bi bi-play-fill"></i> Start Auto
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            @if (isAutoAdvancePaused)
+                                            {
+                                                <button class="btn btn-sm btn-warning" @onclick="ResumeAutoAdvance">
+                                                    <i class="bi bi-play-fill"></i> Resume Auto
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-warning" @onclick="PauseAutoAdvance">
+                                                    <i class="bi bi-pause-fill"></i> Pause Auto
+                                                </button>
+                                            }
+                                            <button class="btn btn-sm btn-danger" @onclick="StopAutoAdvance">
+                                                <i class="bi bi-stop-fill"></i> Stop Auto
+                                            </button>
+                                        }
+                                    </div>
+                                    @if (isAutoAdvancing)
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                Auto-advancing @autoAdvanceDirection every @autoAdvanceIntervalSeconds seconds
+                                                @if (isAutoAdvancePaused) { <span class="text-warning">(Paused)</span> }
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Manual navigation -->
+                                <div class="d-flex justify-content-between mt-3">
                                     <button class="btn btn-sm btn-outline-primary" @onclick="PreviousPoint" disabled="@(currentPointIndex <= 0)">
                                         ← Previous
                                     </button>
@@ -138,6 +201,13 @@
                             @if (isNavigating)
                             {
                                 <span class="badge bg-success">Point @(currentPointIndex + 1) of @currentRoute.Points.Count</span>
+                                @if (currentPointIndex > 0)
+                                {
+                                    var currentNavPoint = currentRoute.Points[currentPointIndex];
+                                    var previousNavPoint = currentRoute.Points[currentPointIndex - 1];
+                                    var stepDistance = CalculateStepDistance(previousNavPoint.Latitude, previousNavPoint.Longitude, currentNavPoint.Latitude, currentNavPoint.Longitude);
+                                    <span class="badge bg-secondary ms-1">Step: @(stepDistance.ToString("F1"))m</span>
+                                }
                             }
                             <span class="badge bg-info">@currentPoint.Latitude.ToString("F6"), @currentPoint.Longitude.ToString("F6")</span>
                         </div>
@@ -146,6 +216,21 @@
                         @{
                             var streetViewUrl = StreetViewService.GetStreetViewEmbedUrl(currentPoint.Latitude, currentPoint.Longitude, heading);
                         }
+                        <!-- Debug info -->
+                        @if (true) // Temporary debug info
+                        {
+                            <div class="alert alert-info m-3">
+                                <strong>Debug Info:</strong><br>
+                                Has API Key: @StreetViewService.HasApiKey<br>
+                                Street View URL Length: @streetViewUrl.Length<br>
+                                URL Empty: @string.IsNullOrEmpty(streetViewUrl)<br>
+                                @if (!string.IsNullOrEmpty(streetViewUrl))
+                                {
+                                    <small>URL: @streetViewUrl.Substring(0, Math.Min(100, streetViewUrl.Length))...</small>
+                                }
+                            </div>
+                        }
+                        
                         @if (!string.IsNullOrEmpty(streetViewUrl))
                         {
                             <iframe src="@streetViewUrl" 
@@ -259,6 +344,13 @@
     private string apiKeyStatusMessage = string.Empty;
     private bool showApiKeyError;
 
+    // Auto-advance functionality
+    private bool isAutoAdvancing;
+    private bool isAutoAdvancePaused;
+    private int autoAdvanceIntervalSeconds = 3;
+    private string autoAdvanceDirection = "forward";
+    private Timer? autoAdvanceTimer;
+
     protected override async Task OnInitializedAsync()
     {
         RouteService.CurrentRouteChanged += OnCurrentRouteChanged;
@@ -306,6 +398,7 @@
         isNavigating = false;
         currentPointIndex = 0;
         showApiKeyError = false;
+        StopAutoAdvance();
         InvokeAsync(StateHasChanged);
     }
 
@@ -372,8 +465,83 @@
     private void StopRoute()
     {
         isNavigating = false;
+        StopAutoAdvance();
         navigationTimer?.Dispose();
         StateHasChanged();
+    }
+
+    private void StartAutoAdvance()
+    {
+        if (currentRoute == null || !currentRoute.Points.Any()) return;
+
+        isAutoAdvancing = true;
+        isAutoAdvancePaused = false;
+        CreateAutoAdvanceTimer();
+        StateHasChanged();
+    }
+
+    private void PauseAutoAdvance()
+    {
+        isAutoAdvancePaused = true;
+        autoAdvanceTimer?.Dispose();
+        StateHasChanged();
+    }
+
+    private void ResumeAutoAdvance()
+    {
+        isAutoAdvancePaused = false;
+        CreateAutoAdvanceTimer();
+        StateHasChanged();
+    }
+
+    private void StopAutoAdvance()
+    {
+        isAutoAdvancing = false;
+        isAutoAdvancePaused = false;
+        autoAdvanceTimer?.Dispose();
+        StateHasChanged();
+    }
+
+    private void CreateAutoAdvanceTimer()
+    {
+        autoAdvanceTimer?.Dispose();
+        autoAdvanceTimer = new Timer(AutoAdvanceCallback, null, 
+            TimeSpan.FromSeconds(autoAdvanceIntervalSeconds), 
+            TimeSpan.FromSeconds(autoAdvanceIntervalSeconds));
+    }
+
+    private void AutoAdvanceCallback(object? state)
+    {
+        if (!isAutoAdvancing || isAutoAdvancePaused || currentRoute == null)
+            return;
+
+        InvokeAsync(() =>
+        {
+            if (autoAdvanceDirection == "forward")
+            {
+                if (currentPointIndex < currentRoute.Points.Count - 1)
+                {
+                    NextPoint();
+                }
+                else
+                {
+                    // Reached the end, stop auto-advance
+                    StopAutoAdvance();
+                }
+            }
+            else // reverse
+            {
+                if (currentPointIndex > 0)
+                {
+                    PreviousPoint();
+                }
+                else
+                {
+                    // Reached the beginning, stop auto-advance
+                    StopAutoAdvance();
+                }
+            }
+        });
     }
 
     private void NextPoint()
@@ -394,9 +562,25 @@
         }
     }
 
+    private double CalculateStepDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        // Haversine formula to calculate distance between two points on Earth
+        const double R = 6371000; // Earth's radius in meters
+        var dLat = ToRadians(lat2 - lat1);
+        var dLon = ToRadians(lon2 - lon1);
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c; // Distance in meters
+    }
+
+    private static double ToRadians(double degrees) => degrees * Math.PI / 180;
+
     public void Dispose()
     {
         RouteService.CurrentRouteChanged -= OnCurrentRouteChanged;
         navigationTimer?.Dispose();
+        autoAdvanceTimer?.Dispose();
     }
 }

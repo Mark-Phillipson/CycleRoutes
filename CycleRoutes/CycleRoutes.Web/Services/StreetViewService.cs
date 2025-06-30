@@ -87,14 +87,22 @@ public class StreetViewService : IStreetViewService
 
     public string GetStreetViewEmbedUrl(double latitude, double longitude, double heading = 0, int fov = 90, int pitch = 0)
     {
-        if (!HasApiKey || (_apiKeyValidated.HasValue && !_apiKeyValidated.Value))
+        if (!HasApiKey)
         {
+            _logger.LogWarning("No API key available for Street View");
             return string.Empty;
         }
 
-        // Use Google Street View Static API with API key
+        // Don't check validation status on client-side - just generate the URL
         var baseUrl = "https://www.google.com/maps/embed/v1/streetview";
-        return $"{baseUrl}?key={_apiKey}&location={latitude:F6},{longitude:F6}&heading={heading:F1}&pitch={pitch}&fov={fov}";
+        var url = $"{baseUrl}?key={_apiKey}&location={latitude:F6},{longitude:F6}&heading={heading:F1}&pitch={pitch}&fov={fov}";
+        
+        if (!string.IsNullOrEmpty(_apiKey))
+        {
+            _logger.LogInformation("Generated Street View URL for location {Lat},{Lng}: {Url}", 
+                latitude, longitude, url.Replace(_apiKey, "***API_KEY***"));
+        }
+        return url;
     }
 
     public double CalculateBearing(double lat1, double lon1, double lat2, double lon2)
