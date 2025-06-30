@@ -216,27 +216,28 @@
                         @{
                             var streetViewUrl = StreetViewService.GetStreetViewEmbedUrl(currentPoint.Latitude, currentPoint.Longitude, heading);
                         }
-                        <!-- Debug info -->
-                        @if (true) // Temporary debug info
-                        {
-                            <div class="alert alert-info m-3">
-                                <strong>Debug Info:</strong><br>
-                                Has API Key: @StreetViewService.HasApiKey<br>
-                                Street View URL Length: @streetViewUrl.Length<br>
-                                URL Empty: @string.IsNullOrEmpty(streetViewUrl)<br>
-                                @if (!string.IsNullOrEmpty(streetViewUrl))
-                                {
-                                    <small>URL: @streetViewUrl.Substring(0, Math.Min(100, streetViewUrl.Length))...</small>
-                                }
-                            </div>
-                        }
                         
                         @if (!string.IsNullOrEmpty(streetViewUrl))
                         {
-                            <iframe src="@streetViewUrl" 
-                                    width="100%" height="500" style="border:0;" allowfullscreen="" loading="lazy"
-                                    @onload="OnStreetViewLoaded" @onerror="OnStreetViewError">
-                            </iframe>
+                            <div class="position-relative">
+                                @if (isStreetViewLoading)
+                                {
+                                    <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-light" 
+                                         style="height: 500px; z-index: 10;">
+                                        <div class="text-center">
+                                            <div class="spinner-border text-primary mb-2" role="status">
+                                                <span class="visually-hidden">Loading Street View...</span>
+                                            </div>
+                                            <p class="text-muted mb-0">Loading Street View...</p>
+                                        </div>
+                                    </div>
+                                }
+                                <iframe src="@streetViewUrl" 
+                                        width="100%" height="500" style="border:0; @(isStreetViewLoading ? "opacity: 0;" : "opacity: 1; transition: opacity 0.3s ease-in-out;")" 
+                                        allowfullscreen="" loading="lazy"
+                                        @onload="OnStreetViewLoaded" @onerror="OnStreetViewError">
+                                </iframe>
+                            </div>
                             @if (showApiKeyError)
                             {
                                 <div class="alert alert-warning m-3">
@@ -343,6 +344,7 @@
     private bool isValidatingApiKey;
     private string apiKeyStatusMessage = string.Empty;
     private bool showApiKeyError;
+    private bool isStreetViewLoading = true;
 
     // Auto-advance functionality
     private bool isAutoAdvancing;
@@ -383,12 +385,14 @@
     private void OnStreetViewLoaded()
     {
         showApiKeyError = false;
+        isStreetViewLoading = false;
         StateHasChanged();
     }
 
     private void OnStreetViewError()
     {
         showApiKeyError = true;
+        isStreetViewLoading = false;
         StateHasChanged();
     }
 
@@ -398,6 +402,7 @@
         isNavigating = false;
         currentPointIndex = 0;
         showApiKeyError = false;
+        isStreetViewLoading = true;
         StopAutoAdvance();
         InvokeAsync(StateHasChanged);
     }
@@ -549,6 +554,7 @@
         if (currentRoute != null && currentPointIndex < currentRoute.Points.Count - 1)
         {
             currentPointIndex++;
+            isStreetViewLoading = true;
             StateHasChanged();
         }
     }
@@ -558,6 +564,7 @@
         if (currentPointIndex > 0)
         {
             currentPointIndex--;
+            isStreetViewLoading = true;
             StateHasChanged();
         }
     }
