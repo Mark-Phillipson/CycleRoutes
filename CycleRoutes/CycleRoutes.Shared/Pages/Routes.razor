@@ -97,7 +97,7 @@
         </div>
 
             <!-- Current Route Info -->
-            @if (currentRoute != null)
+            @if (currentRoute != null && !isRouteManagementCollapsed)
             {
                 <div class="card mt-3">
                     <div class="card-header">
@@ -107,6 +107,21 @@
                         <p><strong>Distance:</strong> @((currentRoute.TotalDistance / 1000).ToString("F1")) km (@((currentRoute.TotalDistance / 1000 * 0.621371).ToString("F1")) mi)</p>
                         <p><strong>Points:</strong> @currentRoute.Points.Count</p>
                         <p><strong>Est. Duration:</strong> @currentRoute.EstimatedDuration.ToString(@"hh\:mm")</p>
+                        
+                        <!-- Debug Information -->
+                        <div class="mb-3 p-2 bg-light rounded">
+                            <small class="text-muted">
+                                <strong>Debug Info:</strong><br>
+                                Stored TotalDistance: @currentRoute.TotalDistance.ToString("F2") m<br>
+                                Recalculated Distance: @currentRoute.CalculateTotalDistance().ToString("F2") m<br>
+                                @if (currentRoute.Points.Count >= 2)
+                                {
+                                    var firstPoint = currentRoute.Points[0];
+                                    var secondPoint = currentRoute.Points[1];
+                                    <text>First segment: (@firstPoint.Latitude.ToString("F6"), @firstPoint.Longitude.ToString("F6")) to (@secondPoint.Latitude.ToString("F6"), @secondPoint.Longitude.ToString("F6"))<br></text>
+                                }
+                            </small>
+                        </div>
                         
                         @if (currentRoute.Points.Count > 1)
                         {

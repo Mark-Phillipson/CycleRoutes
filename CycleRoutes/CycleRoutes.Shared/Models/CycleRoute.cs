@@ -27,7 +27,8 @@ public class CycleRoute
         double totalDistance = 0;
         foreach (var (from, to) in GetSegments())
         {
-            totalDistance += CalculateDistance(from, to);
+            var segmentDistance = CalculateDistance(from, to);
+            totalDistance += segmentDistance;
         }
         return totalDistance;
     }

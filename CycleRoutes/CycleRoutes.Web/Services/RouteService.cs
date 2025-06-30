@@ -16,6 +16,37 @@ public class RouteService : IRouteService
     public RouteService(ILogger<RouteService> logger)
     {
         _logger = logger;
+        _ = Task.Run(LoadDefaultRouteAsync); // Load sample route in background
+    }
+
+    private async Task LoadDefaultRouteAsync()
+    {
+        try
+        {
+            // Load the sample GPX file from wwwroot
+            var sampleGpxPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "sample-london-loop.gpx");
+            
+            if (File.Exists(sampleGpxPath))
+            {
+                using var fileStream = File.OpenRead(sampleGpxPath);
+                var route = await LoadRouteFromGpxAsync(fileStream, "sample-london-loop.gpx");
+                
+                if (route != null)
+                {
+                    await SaveRouteAsync(route);
+                    SetCurrentRoute(route);
+                    _logger.LogInformation("Automatically loaded sample route: {RouteName}", route.Name);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Sample GPX file not found at: {Path}", sampleGpxPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load default sample route");
+        }
     }
 
     public async Task<CycleRoute?> LoadRouteFromGpxAsync(Stream gpxStream, string fileName)
