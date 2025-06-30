@@ -8,11 +8,23 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-4">
+        <div class="@(isRouteManagementCollapsed ? "col-md-1" : "col-md-4")">
             <div class="card">
-                <div class="card-header">
-                    <h5>Route Management</h5>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 @(isRouteManagementCollapsed ? "d-none" : "")">Route Management</h5>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="ToggleRouteManagement" title="@(isRouteManagementCollapsed ? "Expand" : "Collapse")">
+                        @if (isRouteManagementCollapsed)
+                        {
+                            <i class="bi bi-chevron-right"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-chevron-up"></i>
+                        }
+                    </button>
                 </div>
+                @if (!isRouteManagementCollapsed)
+                {
                 <div class="card-body">
                     <!-- File Upload -->
                     <div class="mb-3">
@@ -70,7 +82,8 @@
                         }
                     </div>
                 </div>
-            </div>
+            }
+        </div>
 
             <!-- Current Route Info -->
             @if (currentRoute != null)
@@ -183,7 +196,7 @@
             }
         </div>
 
-        <div class="col-md-8">
+        <div class="@(isRouteManagementCollapsed ? "col-md-11" : "col-md-8")">
             @if (currentRoute != null && currentRoute.Points.Any())
             {
                 var currentPoint = isNavigating ? currentRoute.Points[currentPointIndex] : currentRoute.StartPoint!;
@@ -344,6 +357,7 @@
     private string apiKeyStatusMessage = string.Empty;
     private bool showApiKeyError;
     private bool isStreetViewLoading = true;
+    private bool isRouteManagementCollapsed = false;
 
     // Auto-advance functionality
     private bool isAutoAdvancing;
@@ -393,6 +407,11 @@
         showApiKeyError = true;
         isStreetViewLoading = false;
         StateHasChanged();
+    }
+
+    private void ToggleRouteManagement()
+    {
+        isRouteManagementCollapsed = !isRouteManagementCollapsed;
     }
 
     private void OnCurrentRouteChanged(CycleRoute? route)

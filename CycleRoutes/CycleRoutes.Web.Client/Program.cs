@@ -4,6 +4,9 @@ using CycleRoutes.Web.Client.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
+// Add HttpClient for the client-side services
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
 // Add device-specific services used by the CycleRoutes.Shared project
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
 
