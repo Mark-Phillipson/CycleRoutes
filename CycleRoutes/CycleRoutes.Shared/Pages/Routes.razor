@@ -61,7 +61,10 @@
                                         <div>
                                             <strong>@route.Name</strong><br>
                                             <small class="text-muted">
-                                                @((route.TotalDistance / 1000).ToString("F1")) km (@((route.TotalDistance / 1000 * 0.621371).ToString("F1")) mi) • @route.Points.Count points
+                                                @{
+                                                    var actualDistance = route.CalculateTotalDistance();
+                                                }
+                                                @((actualDistance / 1000).ToString("F1")) km (@((actualDistance / 1000 * 0.621371).ToString("F1")) mi) • @route.Points.Count points
                                             </small>
                                         </div>
                                         <div>
@@ -104,9 +107,12 @@
                         <h6>Current Route: @currentRoute.Name</h6>
                     </div>
                     <div class="card-body">
-                        <p><strong>Distance:</strong> @((currentRoute.TotalDistance / 1000).ToString("F1")) km (@((currentRoute.TotalDistance / 1000 * 0.621371).ToString("F1")) mi)</p>
+                        @{
+                            var currentRouteDistance = currentRoute.CalculateTotalDistance();
+                        }
+                        <p><strong>Distance:</strong> @((currentRouteDistance / 1000).ToString("F1")) km (@((currentRouteDistance / 1000 * 0.621371).ToString("F1")) mi)</p>
                         <p><strong>Points:</strong> @currentRoute.Points.Count</p>
-                        <p><strong>Est. Duration:</strong> @currentRoute.EstimatedDuration.ToString(@"hh\:mm")</p>
+                        <p><strong>Est. Duration:</strong> @TimeSpan.FromHours(currentRouteDistance / 1000 / 15).ToString(@"hh\:mm")</p>
                         
                         <!-- Debug Information -->
                         <div class="mb-3 p-2 bg-light rounded">
@@ -125,7 +131,8 @@
                         
                         @if (currentRoute.Points.Count > 1)
                         {
-                            var avgStepDistance = currentRoute.TotalDistance / (currentRoute.Points.Count - 1);
+                            var actualDistance = currentRoute.CalculateTotalDistance();
+                            var avgStepDistance = actualDistance / (currentRoute.Points.Count - 1);
                             <p><strong>Avg Step Distance:</strong> @(avgStepDistance.ToString("F1")) m (@((avgStepDistance * 3.28084).ToString("F1")) ft)</p>
                         }
                         
@@ -723,6 +730,10 @@
 
         isNavigating = true;
         currentPointIndex = 0;
+        
+        // Automatically start auto-advance for better user experience
+        StartAutoAdvance();
+        
         StateHasChanged();
     }
 

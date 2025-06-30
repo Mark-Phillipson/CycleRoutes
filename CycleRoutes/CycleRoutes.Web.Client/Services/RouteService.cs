@@ -54,8 +54,8 @@ public class RouteService : IRouteService
                 EstimatedDuration = TimeSpan.FromHours(points.Count * 0.01) // Rough estimate based on points
             };
 
-            // Calculate and set the total distance
-            route.TotalDistance = route.CalculateTotalDistance() / 1000; // Convert to km
+            // Calculate and set the total distance (keep in meters)
+            route.TotalDistance = route.CalculateTotalDistance();
 
             return route;
         }
