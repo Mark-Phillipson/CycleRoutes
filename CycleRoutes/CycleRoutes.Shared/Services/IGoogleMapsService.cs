@@ -33,4 +33,9 @@ public interface IGoogleMapsService
     /// Generates the JavaScript code to update the current position marker
     /// </summary>
     string GenerateUpdatePositionScript(RoutePoint currentPoint, string mapElementId);
+    
+    /// <summary>
+    /// Generates the JavaScript code to add click listeners to the route for navigation
+    /// </summary>
+    string GenerateRouteClickScript(CycleRoute route, string callbackFunction);
 }

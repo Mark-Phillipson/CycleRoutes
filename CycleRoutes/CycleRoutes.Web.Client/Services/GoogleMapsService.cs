@@ -75,12 +75,24 @@ public class GoogleMapsService : IGoogleMapsService
     {
         // Use the full API URL if we fetched it from the server
         if (!string.IsNullOrEmpty(_apiUrl))
-            return _apiUrl + "&callback=initGoogleMaps";
+        {
+            // Ensure geometry library is included
+            var url = _apiUrl;
+            if (!url.Contains("libraries="))
+            {
+                url += "&libraries=geometry";
+            }
+            else if (!url.Contains("geometry"))
+            {
+                url = url.Replace("libraries=", "libraries=geometry,");
+            }
+            return url + "&callback=initGoogleMaps";
+        }
             
         if (!HasApiKey)
             return string.Empty;
         
-        return $"https://maps.googleapis.com/maps/api/js?key={_apiKey}&callback=initGoogleMaps&loading=async";
+        return $"https://maps.googleapis.com/maps/api/js?key={_apiKey}&libraries=geometry&callback=initGoogleMaps&loading=async";
     }
 
     public async Task<bool> ValidateApiKeyAsync()
@@ -267,6 +279,70 @@ if (window.cycleRouteCurrentMarker && window.cycleRouteMap) {{
     
     window.cycleRouteCurrentMarker.setPosition(newPosition);
     window.cycleRouteMap.panTo(newPosition);
+}}";
+    }
+
+    public string GenerateRouteClickScript(CycleRoute route, string callbackFunction)
+    {
+        if (!route.Points.Any())
+            return string.Empty;
+
+        var routePointsJson = string.Join(",", route.Points.Select((p, index) => 
+            $"{{lat: {p.Latitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)}, lng: {p.Longitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)}, index: {index}}}"));
+
+        return $@"
+if (window.cycleRoutePolyline && window.cycleRouteMap) {{
+    const routePoints = [{routePointsJson}];
+    
+    // Function to find the closest point on the route to the clicked location
+    function findClosestRoutePoint(clickedLatLng) {{
+        let closestIndex = 0;
+        let minDistance = Number.MAX_VALUE;
+        
+        routePoints.forEach((point, index) => {{
+            const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                clickedLatLng, 
+                new google.maps.LatLng(point.lat, point.lng)
+            );
+            
+            if (distance < minDistance) {{
+                minDistance = distance;
+                closestIndex = index;
+            }}
+        }});
+        
+        return closestIndex;
+    }}
+    
+    // Add click listener to the polyline
+    window.cycleRoutePolyline.addListener('click', function(event) {{
+        const clickedLatLng = event.latLng;
+        const closestPointIndex = findClosestRoutePoint(clickedLatLng);
+        
+        // Call the C# callback function
+        if (window.DotNet && window.{callbackFunction}) {{
+            window.{callbackFunction}(closestPointIndex);
+        }}
+    }});
+    
+    // Also add click listener to the map for points near the route
+    window.cycleRouteMap.addListener('click', function(event) {{
+        const clickedLatLng = event.latLng;
+        const closestPointIndex = findClosestRoutePoint(clickedLatLng);
+        
+        // Only trigger if the click is reasonably close to the route (within 100 meters)
+        const closestPoint = routePoints[closestPointIndex];
+        const distanceToRoute = google.maps.geometry.spherical.computeDistanceBetween(
+            clickedLatLng,
+            new google.maps.LatLng(closestPoint.lat, closestPoint.lng)
+        );
+        
+        if (distanceToRoute <= 100) {{ // 100 meters tolerance
+            if (window.DotNet && window.{callbackFunction}) {{
+                window.{callbackFunction}(closestPointIndex);
+            }}
+        }}
+    }});
 }}";
     }
 }

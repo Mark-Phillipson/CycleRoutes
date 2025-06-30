@@ -46,6 +46,12 @@ public class StreetViewService : IStreetViewService
         return (bearing + 360) % 360; // Normalize to 0-360 degrees
     }
 
+    public string GetFallbackMapUrl(double latitude, double longitude, int zoom = 18)
+    {
+        // Use a server endpoint that will proxy the fallback map request with the API key
+        return $"/api/fallbackmap?lat={latitude:F6}&lng={longitude:F6}&zoom={zoom}";
+    }
+
     private static double ToRadians(double degrees) => degrees * Math.PI / 180;
     private static double ToDegrees(double radians) => radians * 180 / Math.PI;
 }

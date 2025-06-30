@@ -138,87 +138,49 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h6 class="mb-0">Street View</h6>
-                        <div class="d-flex align-items-center">
-                            @if (isNavigating)
-                            {
-                                <div class="btn-group me-2">
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="PreviousPoint" disabled="@(currentPointIndex == 0)">
-                                        <i class="bi bi-chevron-left"></i>
-                                    </button>
-                                    
-                                    @if (isAutoAdvancing)
+                        @if (isNavigating)
+                        {
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="PreviousPoint" disabled="@(currentPointIndex == 0)">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                
+                                @if (isAutoAdvancing)
+                                {
+                                    @if (isAutoAdvancePaused)
                                     {
-                                        @if (isAutoAdvancePaused)
-                                        {
-                                            <button class="btn btn-sm btn-warning" @onclick="ResumeAutoAdvance">
-                                                <i class="bi bi-play"></i> Resume
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn btn-sm btn-warning" @onclick="PauseAutoAdvance">
-                                                <i class="bi bi-pause"></i> Pause
-                                            </button>
-                                        }
-                                        <button class="btn btn-sm btn-secondary" @onclick="StopAutoAdvance">
-                                            <i class="bi bi-stop"></i> Stop Auto
+                                        <button class="btn btn-sm btn-warning" @onclick="ResumeAutoAdvance">
+                                            <i class="bi bi-play"></i> Resume
                                         </button>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-sm btn-success" @onclick="StartAutoAdvance">
-                                            <i class="bi bi-fast-forward"></i> Auto
+                                        <button class="btn btn-sm btn-warning" @onclick="PauseAutoAdvance">
+                                            <i class="bi bi-pause"></i> Pause
                                         </button>
                                     }
-                                    
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="NextPoint" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)">
-                                        <i class="bi bi-chevron-right"></i>
+                                    <button class="btn btn-sm btn-secondary" @onclick="StopAutoAdvance">
+                                        <i class="bi bi-stop"></i> Stop Auto
                                     </button>
-                                </div>
-                            }
-                            <button class="btn btn-sm btn-outline-secondary" @onclick="RefreshStreetView" title="Refresh Street View">
-                                <i class="bi bi-arrow-clockwise"></i>
-                            </button>
-                        </div>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-success" @onclick="StartAutoAdvance">
+                                        <i class="bi bi-fast-forward"></i> Auto
+                                    </button>
+                                }
+                                
+                                <button class="btn btn-sm btn-outline-primary" @onclick="NextPoint" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        }
                     </div>
                     <div class="card-body p-0">
                         @if (StreetViewService.HasApiKey)
                         {
-                            var streetViewUrl = StreetViewService.GetStreetViewEmbedUrl(currentPoint.Latitude, currentPoint.Longitude, 0);
-                            if (!string.IsNullOrEmpty(streetViewUrl))
-                            {
-                                <iframe src="@streetViewUrl" 
-                                        width="100%" height="400" style="border: none;"
-                                        title="Google Street View"></iframe>
-                                <div class="position-absolute top-0 end-0 m-2">
-                                    <small class="badge bg-secondary">
-                                        @currentPoint.Latitude.ToString("F6"), @currentPoint.Longitude.ToString("F6")
-                                    </small>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-warning m-3" role="alert">
-                                    <h6>Street View Unavailable</h6>
-                                    <p class="mb-2">Street View could not be loaded. Showing map view instead.</p>
-                                    <small class="text-muted">This could be due to API quota limits, billing issues, or Street View not being available at this location.</small>
-                                </div>
-                                <!-- Fallback to regular Google Maps -->
-                                var fallbackMapUrl = StreetViewService.GetFallbackMapUrl(currentPoint.Latitude, currentPoint.Longitude, 18);
-                                if (!string.IsNullOrEmpty(fallbackMapUrl))
-                                {
-                                    <iframe src="@fallbackMapUrl" 
-                                            width="100%" height="400" style="border: none;"
-                                            title="Google Maps - Fallback View"></iframe>
-                                }
-                                else
-                                {
-                                    <div class="alert alert-danger m-3" role="alert">
-                                        <h6>Maps Unavailable</h6>
-                                        <p class="mb-0">Both Street View and fallback map could not be loaded.</p>
-                                    </div>
-                                }
-                            }
+                            <iframe src="@StreetViewService.GetStreetViewUrl(currentPoint.Latitude, currentPoint.Longitude, 0)" 
+                                    width="100%" height="400" style="border: none;"></iframe>
                         }
                         else
                         {
@@ -312,7 +274,6 @@
 </div>
 
 @code {
-    private static Routes? _instance;
     private List<CycleRoute> savedRoutes = new();
     private CycleRoute? currentRoute;
     private bool isLoading;
@@ -338,7 +299,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _instance = this;
         RouteService.CurrentRouteChanged += OnCurrentRouteChanged;
         savedRoutes = await RouteService.GetSavedRoutesAsync();
         currentRoute = RouteService.CurrentRoute;
@@ -347,11 +307,9 @@
         await GoogleMapsService.ValidateApiKeyAsync();
         
         await UpdateApiKeyStatus();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && currentRoute != null)
+        
+        // Initialize map if we already have a route loaded
+        if (currentRoute != null)
         {
             await InitializeMap();
         }
@@ -535,18 +493,17 @@
 
     private void OnCurrentRouteChanged(CycleRoute? route)
     {
+        currentRoute = route;
+        isNavigating = false;
+        currentPointIndex = 0;
+        showApiKeyError = false;
+        isMapLoading = true;
+        isMapInitialized = false;
+        StopAutoAdvance();
+        
         InvokeAsync(async () =>
         {
-            currentRoute = route;
-            isNavigating = false;
-            currentPointIndex = 0;
-            showApiKeyError = false;
-            isMapLoading = true;
-            isMapInitialized = false;
-            StopAutoAdvance();
-            
             StateHasChanged();
-            
             if (currentRoute != null && GoogleMapsService.HasApiKey)
             {
                 // Add a small delay to ensure the DOM is ready
@@ -755,37 +712,26 @@
         }
     }
 
-    private void RefreshStreetView()
-    {
-        // Force a re-render of the Street View by triggering a state change
-        StateHasChanged();
-    }
-
     [JSInvokable]
-    public static async Task OnMapRouteClick(int pointIndex)
+    public async Task OnMapRouteClick(int pointIndex)
     {
-        if (_instance?.currentRoute == null || !_instance.isNavigating) 
+        if (currentRoute == null || !isNavigating) 
             return;
 
-        await _instance.InvokeAsync(async () =>
+        // Ensure the point index is within bounds
+        pointIndex = Math.Max(0, Math.Min(pointIndex, currentRoute.Points.Count - 1));
+        
+        // Jump to the selected point
+        if (pointIndex != currentPointIndex)
         {
-            // Ensure the point index is within bounds
-            pointIndex = Math.Max(0, Math.Min(pointIndex, _instance.currentRoute.Points.Count - 1));
-            
-            // Jump to the selected point
-            if (pointIndex != _instance.currentPointIndex)
-            {
-                _instance.currentPointIndex = pointIndex;
-                _instance.StateHasChanged();
-                await _instance.UpdateMapPosition();
-            }
-        });
+            currentPointIndex = pointIndex;
+            StateHasChanged();
+            await UpdateMapPosition();
+        }
     }
 
     public void Dispose()
     {
-        if (_instance == this)
-            _instance = null;
         RouteService.CurrentRouteChanged -= OnCurrentRouteChanged;
         navigationTimer?.Dispose();
         autoAdvanceTimer?.Dispose();

@@ -39,6 +39,12 @@ public class StreetViewService : IStreetViewService
         return (bearing + 360) % 360; // Normalize to 0-360 degrees
     }
 
+    public string GetFallbackMapUrl(double latitude, double longitude, int zoom = 18)
+    {
+        // Return empty for MAUI - fallback maps also need API keys which are managed server-side
+        return string.Empty;
+    }
+
     private static double ToRadians(double degrees) => degrees * Math.PI / 180;
     private static double ToDegrees(double radians) => radians * 180 / Math.PI;
 }

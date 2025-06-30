@@ -8,4 +8,5 @@ public interface IStreetViewService
     bool HasApiKey { get; }
     Task<bool> ValidateApiKeyAsync();
     string GetApiKeyStatus();
+    string GetFallbackMapUrl(double latitude, double longitude, int zoom = 18);
 }

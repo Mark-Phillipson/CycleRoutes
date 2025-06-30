@@ -93,16 +93,22 @@ public class StreetViewService : IStreetViewService
             return string.Empty;
         }
 
-        // Don't check validation status on client-side - just generate the URL
-        var baseUrl = "https://www.google.com/maps/embed/v1/streetview";
-        var url = $"{baseUrl}?key={_apiKey}&location={latitude:F6},{longitude:F6}&heading={heading:F1}&pitch={pitch}&fov={fov}";
-        
-        if (!string.IsNullOrEmpty(_apiKey))
+        try
         {
+            // Generate the embed URL for Street View
+            var baseUrl = "https://www.google.com/maps/embed/v1/streetview";
+            var url = $"{baseUrl}?key={_apiKey}&location={latitude:F6},{longitude:F6}&heading={heading:F1}&pitch={pitch}&fov={fov}";
+            
             _logger.LogInformation("Generated Street View URL for location {Lat},{Lng}: {Url}", 
-                latitude, longitude, url.Replace(_apiKey, "***API_KEY***"));
+                latitude, longitude, url.Replace(_apiKey!, "***API_KEY***"));
+            
+            return url;
         }
-        return url;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating Street View URL for location {Lat},{Lng}", latitude, longitude);
+            return string.Empty;
+        }
     }
 
     public double CalculateBearing(double lat1, double lon1, double lat2, double lon2)
@@ -114,6 +120,16 @@ public class StreetViewService : IStreetViewService
         
         var bearing = ToDegrees(Math.Atan2(y, x));
         return (bearing + 360) % 360; // Normalize to 0-360 degrees
+    }
+
+    public string GetFallbackMapUrl(double latitude, double longitude, int zoom = 18)
+    {
+        if (!HasApiKey)
+        {
+            return string.Empty;
+        }
+
+        return $"https://www.google.com/maps/embed/v1/view?key={_apiKey}&center={latitude:F6},{longitude:F6}&zoom={zoom}&maptype=roadmap";
     }
 
     private static double ToRadians(double degrees) => degrees * Math.PI / 180;

@@ -15,5 +15,7 @@ public class GoogleMapsService : IGoogleMapsService
 
     public string GenerateUpdatePositionScript(RoutePoint currentPoint, string mapElementId) => string.Empty;
 
+    public string GenerateRouteClickScript(CycleRoute route, string callbackFunction) => string.Empty;
+
     public Task<bool> ValidateApiKeyAsync() => Task.FromResult(false);
 }
