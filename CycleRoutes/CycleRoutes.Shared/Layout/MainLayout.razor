@@ -1,13 +1,16 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link @(IsActive("/") ? "active" : "")">Home</a>
+                <a href="/routes" class="nav-link @(IsActive("/routes") ? "active" : "")">Routes</a>
+            </div>
+            <div class="app-info">
+                <span class="app-title">CycleRoutes</span>
+            </div>
         </div>
 
         <article class="content px-4">
@@ -21,3 +24,15 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private bool IsActive(string path)
+    {
+        var currentPath = new Uri(Navigation.Uri).AbsolutePath;
+        if (path == "/")
+        {
+            return currentPath == "/";
+        }
+        return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
