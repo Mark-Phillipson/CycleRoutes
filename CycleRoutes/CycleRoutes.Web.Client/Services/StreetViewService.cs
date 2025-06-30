@@ -4,16 +4,23 @@ namespace CycleRoutes.Web.Client.Services;
 
 public class StreetViewService : IStreetViewService
 {
-    public bool HasApiKey => false; // Client-side doesn't have access to server config
+    private readonly HttpClient _httpClient;
+
+    public StreetViewService(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
+
+    public bool HasApiKey => true; // Always assume we have API key on client - server will handle it
 
     public Task<bool> ValidateApiKeyAsync()
     {
-        return Task.FromResult(false);
+        return Task.FromResult(true); // Let server handle validation
     }
 
     public string GetApiKeyStatus()
     {
-        return "API key validation not available on client-side";
+        return "API key managed server-side";
     }
 
     public string GetStreetViewUrl(double latitude, double longitude, double heading = 0, int fov = 90, int pitch = 0)
@@ -24,7 +31,8 @@ public class StreetViewService : IStreetViewService
 
     public string GetStreetViewEmbedUrl(double latitude, double longitude, double heading = 0, int fov = 90, int pitch = 0)
     {
-        return string.Empty; // No embedding support on client-side without API key
+        // Use a server endpoint that will proxy the Street View request with the API key
+        return $"/api/streetview?lat={latitude:F6}&lng={longitude:F6}&heading={heading:F1}&pitch={pitch}&fov={fov}";
     }
 
     public double CalculateBearing(double lat1, double lon1, double lat2, double lon2)
