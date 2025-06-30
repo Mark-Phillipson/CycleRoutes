@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CycleRoutes.Web.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/streetview")]
 public class StreetViewController : ControllerBase
 {
     private readonly IConfiguration _configuration;

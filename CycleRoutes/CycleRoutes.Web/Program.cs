@@ -9,6 +9,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+// Add controllers for API endpoints
+builder.Services.AddControllers();
+
 // Add HTTP client for API validation
 builder.Services.AddHttpClient();
 
@@ -18,6 +21,7 @@ builder.Services.AddSingleton<IFormFactor, FormFactor>();
 // Add route and street view services with appropriate lifetimes
 builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IStreetViewService, StreetViewService>();
+builder.Services.AddScoped<IGoogleMapsService, GoogleMapsService>();
 builder.Services.AddSingleton<ApiKeyTester>();
 
 var app = builder.Build();
@@ -38,6 +42,11 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+// Add controllers for API endpoints
+app.MapControllers();
+
+app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()

@@ -13,5 +13,6 @@ builder.Services.AddSingleton<IFormFactor, FormFactor>();
 // Add route and street view services for client-side with appropriate lifetimes
 builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IStreetViewService, StreetViewService>();
+builder.Services.AddScoped<IGoogleMapsService, GoogleMapsService>();
 
 await builder.Build().RunAsync();

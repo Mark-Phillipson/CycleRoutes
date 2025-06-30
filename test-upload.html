@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test GPX Upload</title>
+</head>
+<body>
+    <h1>Test GPX Upload</h1>
+    <form action="http://localhost:5178/routes" method="post" enctype="multipart/form-data">
+        <input type="file" name="gpxFile" accept=".gpx">
+        <button type="submit">Upload</button>
+    </form>
+    
+    <script>
+        // Auto-load the sample file for testing
+        fetch('/sample-london-loop.gpx')
+            .then(response => response.text())
+            .then(gpxContent => {
+                console.log('Sample GPX loaded:', gpxContent.substring(0, 200) + '...');
+            });
+    </script>
+</body>
+</html>

@@ -22,6 +22,7 @@ public static class MauiProgram
         // Add route and street view services for MAUI
         builder.Services.AddScoped<IRouteService, RouteService>();
         builder.Services.AddScoped<IStreetViewService, StreetViewService>();
+        builder.Services.AddScoped<IGoogleMapsService, GoogleMapsService>();
 
         builder.Services.AddMauiBlazorWebView();
 
