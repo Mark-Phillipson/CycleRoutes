@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/CycleRoutes/">
+    <Project Path="CycleRoutes/CycleRoutes.Shared/CycleRoutes.Shared.csproj" />
+    <Project Path="CycleRoutes/CycleRoutes.Web.Client/CycleRoutes.Web.Client.csproj" />
+    <Project Path="CycleRoutes/CycleRoutes.Web/CycleRoutes.Web.csproj" />
+    <Project Path="CycleRoutes/CycleRoutes/CycleRoutes.csproj" />
+  </Folder>
+</Solution>

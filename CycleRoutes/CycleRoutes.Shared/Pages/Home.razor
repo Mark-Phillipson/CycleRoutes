@@ -1,0 +1,107 @@
+﻿ @page "/"
+@inject IFormFactor FormFactor
+
+<PageTitle>CycleRoutes</PageTitle>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="display-4">🚴‍♂️ CycleRoutes</h1>
+                <p class="lead">Navigate your cycling adventures with Google Street View</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="display-1 text-primary mb-3">📁</div>
+                            <h4>Import GPX Routes</h4>
+                            <p class="text-muted">Upload your GPX files to view and navigate your cycling routes with precise turn-by-turn Street View guidance.</p>
+                            <a href="/routes" class="btn btn-primary">Get Started</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="display-1 text-success mb-3">🗺️</div>
+                            <h4>Street View Navigation</h4>
+                            <p class="text-muted">Experience your route before you ride with immersive Google Street View, automatically oriented in your direction of travel.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="display-1 text-info mb-3">⚡</div>
+                            <h4>Quick Access</h4>
+                            <p class="text-muted">Save and manage multiple routes for easy access. Perfect for planning training rides or exploring new areas.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="display-1 text-warning mb-3">📱</div>
+                            <h4>Cross-Platform</h4>
+                            <p class="text-muted">Running on <em>@platform</em> with <em>@factor</em> form factor. Works seamlessly across web and mobile devices.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <h3>How It Works</h3>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <span class="badge bg-primary rounded-circle p-3 fs-4">1</span>
+                        </div>
+                        <h5>Upload GPX</h5>
+                        <p class="text-muted">Import your GPX route files from your favorite cycling apps or GPS devices.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <span class="badge bg-primary rounded-circle p-3 fs-4">2</span>
+                        </div>
+                        <h5>Preview Route</h5>
+                        <p class="text-muted">Explore your route point-by-point with Google Street View to familiarize yourself with the path.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <span class="badge bg-primary rounded-circle p-3 fs-4">3</span>
+                        </div>
+                        <h5>Navigate</h5>
+                        <p class="text-muted">Follow your route with confidence, knowing exactly what to expect at each turn.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 p-4 bg-light rounded">
+                <h4>💡 Pro Tip: Google Maps API Key</h4>
+                <p class="mb-2">
+                    For the best Street View experience, add a Google Maps API key to your <code>appsettings.json</code>:
+                </p>
+                <pre class="bg-dark text-light p-3 rounded"><code>{
+  "GoogleMaps": {
+    "ApiKey": "your-api-key-here"
+  }
+}</code></pre>
+                <p class="mb-0">
+                    <a href="https://developers.google.com/maps/documentation/embed/get-api-key" target="_blank" class="btn btn-outline-primary btn-sm">
+                        Get API Key <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string factor => FormFactor.GetFormFactor();
+    private string platform => FormFactor.GetPlatform();
+}

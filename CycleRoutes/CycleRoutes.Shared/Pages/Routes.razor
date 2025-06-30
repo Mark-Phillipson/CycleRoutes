@@ -1,0 +1,402 @@
+@page "/routes"
+@inject IRouteService RouteService
+@inject IStreetViewService StreetViewService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<PageTitle>Cycle Routes</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Route Management</h5>
+                </div>
+                <div class="card-body">
+                    <!-- File Upload -->
+                    <div class="mb-3">
+                        <label for="gpxFile" class="form-label">Upload GPX File</label>
+                        <InputFile OnChange="OnFileSelected" accept=".gpx" class="form-control" id="gpxFile" />
+                    </div>
+
+                    @if (isLoading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading route...</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(statusMessage))
+                    {
+                        <div class="alert @(statusMessage.Contains("Error") ? "alert-danger" : "alert-success")" role="alert">
+                            @statusMessage
+                        </div>
+                    }
+
+                    <!-- Saved Routes -->
+                    <div class="mb-3">
+                        <h6>Saved Routes</h6>
+                        @if (savedRoutes.Any())
+                        {
+                            <div class="list-group">
+                                @foreach (var route in savedRoutes)
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>@route.Name</strong><br>
+                                            <small class="text-muted">
+                                                @((route.TotalDistance / 1000).ToString("F1")) km • @route.Points.Count points
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-primary me-1" @onclick="() => LoadRoute(route)">
+                                                Load
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteRoute(route.Name)">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No saved routes</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Route Info -->
+            @if (currentRoute != null)
+            {
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6>Current Route: @currentRoute.Name</h6>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Distance:</strong> @((currentRoute.TotalDistance / 1000).ToString("F1")) km</p>
+                        <p><strong>Points:</strong> @currentRoute.Points.Count</p>
+                        <p><strong>Est. Duration:</strong> @currentRoute.EstimatedDuration.ToString(@"hh\:mm")</p>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success" @onclick="StartRoute" disabled="@isNavigating">
+                                @if (isNavigating) { <span>Following Route...</span> }
+                                else { <span>Start Following Route</span> }
+                            </button>
+                            @if (isNavigating)
+                            {
+                                <button class="btn btn-secondary" @onclick="StopRoute">
+                                    Stop Following
+                                </button>
+                            }
+                        </div>
+
+                        @if (isNavigating)
+                        {
+                            <div class="mt-3">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: @((double)currentPointIndex / currentRoute.Points.Count * 100)%">
+                                        @currentPointIndex / @currentRoute.Points.Count
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="PreviousPoint" disabled="@(currentPointIndex <= 0)">
+                                        ← Previous
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="NextPoint" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)">
+                                        Next →
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-8">
+            @if (currentRoute != null && currentRoute.Points.Any())
+            {
+                var currentPoint = isNavigating ? currentRoute.Points[currentPointIndex] : currentRoute.StartPoint!;
+                var heading = isNavigating && currentPointIndex < currentRoute.Points.Count - 1 
+                    ? StreetViewService.CalculateBearing(
+                        currentPoint.Latitude, currentPoint.Longitude,
+                        currentRoute.Points[currentPointIndex + 1].Latitude, currentRoute.Points[currentPointIndex + 1].Longitude)
+                    : 0;
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6>Street View</h6>
+                        <div>
+                            @if (isNavigating)
+                            {
+                                <span class="badge bg-success">Point @(currentPointIndex + 1) of @currentRoute.Points.Count</span>
+                            }
+                            <span class="badge bg-info">@currentPoint.Latitude.ToString("F6"), @currentPoint.Longitude.ToString("F6")</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        @{
+                            var streetViewUrl = StreetViewService.GetStreetViewEmbedUrl(currentPoint.Latitude, currentPoint.Longitude, heading);
+                        }
+                        @if (!string.IsNullOrEmpty(streetViewUrl))
+                        {
+                            <iframe src="@streetViewUrl" 
+                                    width="100%" height="500" style="border:0;" allowfullscreen="" loading="lazy"
+                                    @onload="OnStreetViewLoaded" @onerror="OnStreetViewError">
+                            </iframe>
+                            @if (showApiKeyError)
+                            {
+                                <div class="alert alert-warning m-3">
+                                    <strong>Street View failed to load:</strong> @apiKeyStatusMessage
+                                    <br><small>The iframe may show an error or be blank due to API key issues.</small>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center p-5">
+                                @if (isValidatingApiKey)
+                                {
+                                    <div class="spinner-border text-primary mb-3" role="status">
+                                        <span class="visually-hidden">Validating API key...</span>
+                                    </div>
+                                    <h5 class="text-muted mb-3">Validating API Key...</h5>
+                                }
+                                else
+                                {
+                                    <h5 class="text-muted mb-3">Street View Not Available</h5>
+                                    <div class="alert alert-warning text-start">
+                                        <strong>API Key Status:</strong> @apiKeyStatusMessage
+                                    </div>
+                                    
+                                    @if (!StreetViewService.HasApiKey)
+                                    {
+                                        <p class="text-muted mb-3">
+                                            To view Street View, you need a Google Maps API key. 
+                                            <br>Add it to your appsettings.json file under "GoogleMaps:ApiKey".
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted mb-3">
+                                            Your API key appears to be invalid or doesn't have the required permissions.
+                                            <br>Please check your Google Cloud Console settings and ensure the Maps Embed API is enabled.
+                                        </p>
+                                        <button class="btn btn-outline-primary btn-sm mb-3" @onclick="ValidateApiKey">
+                                            <i class="bi bi-arrow-clockwise"></i> Re-validate API Key
+                                        </button>
+                                    }
+                                }
+                                
+                                <p class="mb-3">
+                                    <strong>Current Location:</strong><br>
+                                    Latitude: @currentPoint.Latitude.ToString("F6")<br>
+                                    Longitude: @currentPoint.Longitude.ToString("F6")
+                                    @if (currentPoint.Elevation.HasValue)
+                                    {
+                                        <text><br>Elevation: @currentPoint.Elevation.Value.ToString("F1")m</text>
+                                    }
+                                </p>
+                                <a href="@StreetViewService.GetStreetViewUrl(currentPoint.Latitude, currentPoint.Longitude, heading)" 
+                                   target="_blank" class="btn btn-primary">
+                                    <i class="bi bi-box-arrow-up-right"></i> Open in Google Maps
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Map placeholder for future enhancement -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6>Route Overview</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            Route map visualization will be added in a future update. 
+                            Currently showing Street View for point-by-point navigation.
+                        </p>
+                        @if (currentRoute.StartPoint != null && currentRoute.EndPoint != null)
+                        {
+                            <p>
+                                <strong>Start:</strong> @currentRoute.StartPoint.ToString()<br>
+                                <strong>End:</strong> @currentRoute.EndPoint.ToString()
+                            </p>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="text-muted">No Route Loaded</h5>
+                        <p class="text-muted">Upload a GPX file to get started with route navigation.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<CycleRoute> savedRoutes = new();
+    private CycleRoute? currentRoute;
+    private bool isLoading;
+    private string statusMessage = string.Empty;
+    private bool isNavigating;
+    private int currentPointIndex;
+    private Timer? navigationTimer;
+    private bool isValidatingApiKey;
+    private string apiKeyStatusMessage = string.Empty;
+    private bool showApiKeyError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        RouteService.CurrentRouteChanged += OnCurrentRouteChanged;
+        savedRoutes = await RouteService.GetSavedRoutesAsync();
+        currentRoute = RouteService.CurrentRoute;
+        await UpdateApiKeyStatus();
+    }
+
+    private async Task UpdateApiKeyStatus()
+    {
+        apiKeyStatusMessage = StreetViewService.GetApiKeyStatus();
+        if (StreetViewService.HasApiKey)
+        {
+            isValidatingApiKey = true;
+            StateHasChanged();
+            
+            var isValid = await StreetViewService.ValidateApiKeyAsync();
+            apiKeyStatusMessage = StreetViewService.GetApiKeyStatus();
+            
+            isValidatingApiKey = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ValidateApiKey()
+    {
+        await UpdateApiKeyStatus();
+    }
+
+    private void OnStreetViewLoaded()
+    {
+        showApiKeyError = false;
+        StateHasChanged();
+    }
+
+    private void OnStreetViewError()
+    {
+        showApiKeyError = true;
+        StateHasChanged();
+    }
+
+    private void OnCurrentRouteChanged(CycleRoute? route)
+    {
+        currentRoute = route;
+        isNavigating = false;
+        currentPointIndex = 0;
+        showApiKeyError = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        isLoading = true;
+        statusMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB limit
+            var route = await RouteService.LoadRouteFromGpxAsync(stream, file.Name);
+
+            if (route != null)
+            {
+                await RouteService.SaveRouteAsync(route);
+                RouteService.SetCurrentRoute(route);
+                savedRoutes = await RouteService.GetSavedRoutesAsync();
+                statusMessage = $"Successfully loaded route '{route.Name}' with {route.Points.Count} points.";
+            }
+            else
+            {
+                statusMessage = "Error: Could not load route from the selected file.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error loading file: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void LoadRoute(CycleRoute route)
+    {
+        RouteService.SetCurrentRoute(route);
+        statusMessage = $"Loaded route '{route.Name}'";
+    }
+
+    private async Task DeleteRoute(string routeName)
+    {
+        await RouteService.DeleteRouteAsync(routeName);
+        savedRoutes = await RouteService.GetSavedRoutesAsync();
+        statusMessage = $"Deleted route '{routeName}'";
+        StateHasChanged();
+    }
+
+    private void StartRoute()
+    {
+        if (currentRoute == null || !currentRoute.Points.Any()) return;
+
+        isNavigating = true;
+        currentPointIndex = 0;
+        StateHasChanged();
+    }
+
+    private void StopRoute()
+    {
+        isNavigating = false;
+        navigationTimer?.Dispose();
+        StateHasChanged();
+    }
+
+    private void NextPoint()
+    {
+        if (currentRoute != null && currentPointIndex < currentRoute.Points.Count - 1)
+        {
+            currentPointIndex++;
+            StateHasChanged();
+        }
+    }
+
+    private void PreviousPoint()
+    {
+        if (currentPointIndex > 0)
+        {
+            currentPointIndex--;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        RouteService.CurrentRouteChanged -= OnCurrentRouteChanged;
+        navigationTimer?.Dispose();
+    }
+}
