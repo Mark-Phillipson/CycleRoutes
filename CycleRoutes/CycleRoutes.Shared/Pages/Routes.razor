@@ -215,12 +215,22 @@
                                 <iframe src="@streetViewUrl" 
                                         width="100%" height="400" style="border: none;"
                                         title="Google Street View" 
-                                        allowfullscreen="true"></iframe>
+                                        allowfullscreen="true"
+                                        onload="console.log('Street View iframe loaded successfully')"
+                                        onerror="console.error('Street View iframe failed to load')"></iframe>
                                 <div class="position-absolute top-0 start-50 translate-middle-x m-2">
                                     <small class="badge bg-secondary">
                                         @currentPoint.Latitude.ToString("F6"), @currentPoint.Longitude.ToString("F6")
                                     </small>
                                 </div>
+                                @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                                {
+                                    <div class="position-absolute bottom-0 start-0 m-2">
+                                        <small class="badge bg-info">
+                                            Debug: URL generated
+                                        </small>
+                                    </div>
+                                }
                             }
                             else
                             {
