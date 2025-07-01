@@ -144,6 +144,22 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h6 class="mb-0">Street View</h6>
                         <div class="d-flex align-items-center">
+                            <!-- Auto-advance delay control - always visible when route is loaded -->
+                            <div class="btn-group me-2" role="group" aria-label="Auto-advance delay">
+                                <label class="btn btn-sm btn-outline-secondary d-flex align-items-center" style="min-width: 80px; height: 31px; cursor: default;">
+                                    <i class="bi bi-clock me-1"></i>
+                                    <span class="d-none d-lg-inline">Delay:</span>
+                                </label>
+                                <select class="form-select form-select-sm" @bind="autoAdvanceIntervalSeconds" style="width: 80px; height: 31px; font-size: 0.8rem;">
+                                    <option value="1">1s</option>
+                                    <option value="2">2s</option>
+                                    <option value="3">3s</option>
+                                    <option value="4">4s</option>
+                                    <option value="5">5s</option>
+                                    <option value="10">10s</option>
+                                </select>
+                            </div>
+                            
                             @if (isNavigating)
                             {
                                 <div class="btn-group me-2" role="group" aria-label="Navigation controls">
@@ -179,11 +195,11 @@
                                             <span class="d-none d-md-inline">Auto</span>
                                         </button>
                                     }
-                                    
-                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="NextPoint" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)" title="Next Point" style="min-width: 36px; height: 31px;">
-                                        <i class="bi bi-chevron-right"></i>
-                                    </button>
                                 </div>
+                                    
+                                <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="NextPoint" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)" title="Next Point" style="min-width: 36px; height: 31px;">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
                             }
                             <button class="btn btn-sm btn-outline-secondary" @onclick="RefreshStreetView" title="Refresh Street View">
                                 <i class="bi bi-arrow-clockwise"></i>
@@ -328,10 +344,8 @@
     private string statusMessage = string.Empty;
     private bool isNavigating;
     private int currentPointIndex;
-    private Timer? navigationTimer;
     private bool isValidatingApiKey;
     private string apiKeyStatusMessage = string.Empty;
-    private bool showApiKeyError;
     private bool isRouteManagementCollapsed = false;
 
     // Google Maps functionality
@@ -341,7 +355,19 @@
     // Auto-advance functionality
     private bool isAutoAdvancing;
     private bool isAutoAdvancePaused;
-    private int autoAdvanceIntervalSeconds = 3;
+    private int _autoAdvanceIntervalSeconds = 3;
+    private int autoAdvanceIntervalSeconds
+    {
+        get => _autoAdvanceIntervalSeconds;
+        set
+        {
+            if (_autoAdvanceIntervalSeconds != value)
+            {
+                _autoAdvanceIntervalSeconds = value;
+                RestartAutoAdvanceTimerIfActive();
+            }
+        }
+    }
     private string autoAdvanceDirection = "forward";
     private Timer? autoAdvanceTimer;
 
@@ -549,7 +575,6 @@
             currentRoute = route;
             isNavigating = false;
             currentPointIndex = 0;
-            showApiKeyError = false;
             isMapLoading = true;
             isMapInitialized = false;
             StopAutoAdvance();
@@ -633,7 +658,6 @@
     {
         isNavigating = false;
         StopAutoAdvance();
-        navigationTimer?.Dispose();
         StateHasChanged();
     }
 
@@ -675,6 +699,14 @@
         autoAdvanceTimer = new Timer(AutoAdvanceCallback, null, 
             TimeSpan.FromSeconds(autoAdvanceIntervalSeconds), 
             TimeSpan.FromSeconds(autoAdvanceIntervalSeconds));
+    }
+
+    private void RestartAutoAdvanceTimerIfActive()
+    {
+        if (isAutoAdvancing && !isAutoAdvancePaused)
+        {
+            CreateAutoAdvanceTimer();
+        }
     }
 
     private void AutoAdvanceCallback(object? state)
@@ -796,7 +828,6 @@
         if (_instance == this)
             _instance = null;
         RouteService.CurrentRouteChanged -= OnCurrentRouteChanged;
-        navigationTimer?.Dispose();
         autoAdvanceTimer?.Dispose();
     }
 }
