@@ -4,8 +4,8 @@
     --text-color: #333333;
     --border-color: #d6d5d5;
     --nav-bg: #f7f7f7;
-    --nav-hover-bg: #e3f2fd;
-    --nav-active-bg: #0066cc;
+    --nav-hover-bg: #f3e8ff;
+    --nav-active-bg: #7c3aed;
     --nav-active-text: #ffffff;
     --button-border: #d6d5d5;
     --button-hover-bg: #f0f0f0;
@@ -20,7 +20,7 @@
     --border-color: #404040;
     --nav-bg: #1e1e1e;
     --nav-hover-bg: #333333;
-    --nav-active-bg: #0088ff;
+    --nav-active-bg: #8b5cf6;
     --nav-active-text: #ffffff;
     --button-border: #404040;
     --button-hover-bg: #333333;
@@ -37,17 +37,41 @@ html, body {
 }
 
 a, .btn-link {
-    color: #006bb7;
+    color: #7c3aed;
 }
 
 .btn-primary {
     color: #fff;
-    background-color: var(--nav-active-bg, #1b6ec2);
-    border-color: var(--nav-active-bg, #1861ac);
+    background-color: var(--nav-active-bg, #7c3aed);
+    border-color: var(--nav-active-bg, #7c3aed);
+}
+
+.text-primary {
+    color: var(--nav-active-bg) !important;
+}
+
+.btn-outline-primary {
+    color: var(--nav-active-bg);
+    border-color: var(--nav-active-bg);
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--nav-active-bg);
+    border-color: var(--nav-active-bg);
+}
+
+/* Spinner primary color */
+.spinner-border.text-primary {
+    color: var(--nav-active-bg) !important;
+}
+
+[data-theme="dark"] .spinner-border.text-primary {
+    color: var(--nav-active-bg) !important;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #a855f7;
 }
 
 .content {
