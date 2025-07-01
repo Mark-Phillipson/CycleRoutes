@@ -43,6 +43,12 @@ jobs:
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Debug GitHub Context
+      run: |
+        echo "Repository: ${{ github.repository }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "SHA: ${{ github.sha }}"
+        echo "Actor: ${{ github.actor }}"
     - name: Azure Login
       uses: azure/login@v2
       with:
@@ -51,8 +57,11 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     - name: Verify Azure Login
       run: |
-        az account show
+        echo "Testing Azure CLI access..."
+        az account show --output table
         az account list --output table
+        echo "Checking subscription access..."
+        az group list --output table
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
