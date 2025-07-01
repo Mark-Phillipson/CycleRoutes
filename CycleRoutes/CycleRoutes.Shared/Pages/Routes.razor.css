@@ -51,3 +51,23 @@
 .route-management-panel label {
     color: var(--text-color) !important;
 }
+
+/* Dark mode styling for form select elements (dropdowns) */
+[data-theme="dark"] .form-select {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .form-select:focus {
+    background-color: var(--input-bg) !important;
+    border-color: var(--nav-active-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25) !important;
+}
+
+/* Ensure dropdown options are also properly styled */
+[data-theme="dark"] .form-select option {
+    background-color: var(--input-bg) !important;
+    color: var(--text-color) !important;
+}
