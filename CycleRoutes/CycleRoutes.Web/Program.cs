@@ -24,6 +24,12 @@ builder.Services.AddScoped<IStreetViewService, StreetViewService>();
 builder.Services.AddScoped<IGoogleMapsService, GoogleMapsService>();
 builder.Services.AddSingleton<ApiKeyTester>();
 
+// Add detailed circuit errors for Blazor Server in development
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

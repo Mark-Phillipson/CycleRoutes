@@ -64,8 +64,10 @@
                                                 <small class="text-muted">
                                                     @{
                                                         var actualDistance = route.CalculateTotalDistance();
+                                                        var distanceKm = actualDistance / 1000;
+                                                        var distanceMiles = distanceKm * 0.621371;
                                                     }
-                                                    @((actualDistance / 1000).ToString("F1")) km • @route.Points.Count points
+                                                    @(distanceKm.ToString("F1")) km (@(distanceMiles.ToString("F1")) mi) • @route.Points.Count points
                                                 </small>
                                             </div>
                                             <div>
@@ -108,7 +110,10 @@
                         <h6 class="mb-0">Current Route: @currentRoute.Name</h6>
                     </div>
                     <div class="card-body">
-                        <p><strong>Distance:</strong> @((currentRoute.CalculateTotalDistance() / 1000).ToString("F1")) km</p>
+                        <p><strong>Distance:</strong> @{
+                            var totalDistanceKm = (currentRoute.CalculateTotalDistance() / 1000);
+                            var totalDistanceMiles = totalDistanceKm * 0.621371;
+                        }@(totalDistanceKm.ToString("F1")) km (@(totalDistanceMiles.ToString("F1")) mi)</p>
                         <p><strong>Points:</strong> @currentRoute.Points.Count</p>
                         @if (!isNavigating)
                         {
@@ -190,7 +195,7 @@
                                 <iframe src="@streetViewUrl" 
                                         width="100%" height="400" style="border: none;"
                                         title="Google Street View"></iframe>
-                                <div class="position-absolute top-0 end-0 m-2">
+                                <div class="position-absolute top-0 start-50 translate-middle-x m-2">
                                     <small class="badge bg-secondary">
                                         @currentPoint.Latitude.ToString("F6"), @currentPoint.Longitude.ToString("F6")
                                     </small>
