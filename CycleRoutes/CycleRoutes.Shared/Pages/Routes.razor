@@ -146,8 +146,8 @@
                         <div class="d-flex align-items-center">
                             @if (isNavigating)
                             {
-                                <div class="btn-group me-2">
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="PreviousPoint" disabled="@(currentPointIndex == 0)">
+                                <div class="btn-group me-2" role="group" aria-label="Navigation controls">
+                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="PreviousPoint" disabled="@(currentPointIndex == 0)" title="Previous Point" style="min-width: 36px; height: 31px;">
                                         <i class="bi bi-chevron-left"></i>
                                     </button>
                                     
@@ -155,28 +155,32 @@
                                     {
                                         @if (isAutoAdvancePaused)
                                         {
-                                            <button class="btn btn-sm btn-warning" @onclick="ResumeAutoAdvance">
-                                                <i class="bi bi-play"></i> Resume
+                                            <button class="btn btn-sm btn-outline-warning d-flex align-items-center justify-content-center" @onclick="ResumeAutoAdvance" title="Resume Auto Advance" style="min-width: 70px; height: 31px;">
+                                                <i class="bi bi-play me-1"></i>
+                                                <span class="d-none d-md-inline">Resume</span>
                                             </button>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-sm btn-warning" @onclick="PauseAutoAdvance">
-                                                <i class="bi bi-pause"></i> Pause
+                                            <button class="btn btn-sm btn-outline-warning d-flex align-items-center justify-content-center" @onclick="PauseAutoAdvance" title="Pause Auto Advance" style="min-width: 70px; height: 31px;">
+                                                <i class="bi bi-pause me-1"></i>
+                                                <span class="d-none d-md-inline">Pause</span>
                                             </button>
                                         }
-                                        <button class="btn btn-sm btn-secondary" @onclick="StopAutoAdvance">
-                                            <i class="bi bi-stop"></i> Stop Auto
+                                        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" @onclick="StopAutoAdvance" title="Stop Auto Advance" style="min-width: 60px; height: 31px;">
+                                            <i class="bi bi-stop me-1"></i>
+                                            <span class="d-none d-lg-inline">Stop</span>
                                         </button>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-sm btn-success" @onclick="StartAutoAdvance">
-                                            <i class="bi bi-fast-forward"></i> Auto
+                                        <button class="btn btn-sm btn-success d-flex align-items-center justify-content-center" @onclick="StartAutoAdvance" title="Start Auto Advance" style="min-width: 60px; height: 31px;">
+                                            <i class="bi bi-fast-forward me-1"></i>
+                                            <span class="d-none d-md-inline">Auto</span>
                                         </button>
                                     }
                                     
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="NextPoint" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)">
+                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="NextPoint" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)" title="Next Point" style="min-width: 36px; height: 31px;">
                                         <i class="bi bi-chevron-right"></i>
                                     </button>
                                 </div>
