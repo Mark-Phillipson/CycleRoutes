@@ -62,6 +62,8 @@ jobs:
         az account list --output table
         echo "Checking subscription access..."
         az group list --output table
+        echo "Looking for web apps..."
+        az webapp list --query "[].{Name:name, ResourceGroup:resourceGroup, Location:location}" --output table
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
