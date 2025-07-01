@@ -19,6 +19,7 @@ public static class GpxParser
             
             bool inTrack = false;
             bool inTrackSegment = false;
+            bool foundRouteNameInFile = false;
 
             while (await reader.ReadAsync())
             {
@@ -26,14 +27,44 @@ public static class GpxParser
                 {
                     switch (reader.LocalName.ToLowerInvariant())
                     {
-                        case "name" when !inTrack:
-                            route.Name = await reader.ReadElementContentAsStringAsync();
+                        case "name" when !inTrack && !foundRouteNameInFile:
+                            var routeName = await reader.ReadElementContentAsStringAsync();
+                            if (!string.IsNullOrWhiteSpace(routeName))
+                            {
+                                route.Name = routeName.Trim();
+                                foundRouteNameInFile = true;
+                            }
+                            break;
+                        case "n" when !inTrack && !foundRouteNameInFile: // Some GPX files use <n> instead of <name>
+                            var routeNameShort = await reader.ReadElementContentAsStringAsync();
+                            if (!string.IsNullOrWhiteSpace(routeNameShort))
+                            {
+                                route.Name = routeNameShort.Trim();
+                                foundRouteNameInFile = true;
+                            }
                             break;
                         case "desc" when !inTrack:
                             route.Description = await reader.ReadElementContentAsStringAsync();
                             break;
                         case "trk":
                             inTrack = true;
+                            break;
+                        case "name" when inTrack && !foundRouteNameInFile:
+                            // If we haven't found a route name yet, use the track name
+                            var trackName = await reader.ReadElementContentAsStringAsync();
+                            if (!string.IsNullOrWhiteSpace(trackName))
+                            {
+                                route.Name = trackName.Trim();
+                                foundRouteNameInFile = true;
+                            }
+                            break;
+                        case "n" when inTrack && !foundRouteNameInFile: // Some GPX files use <n> instead of <name>
+                            var trackNameShort = await reader.ReadElementContentAsStringAsync();
+                            if (!string.IsNullOrWhiteSpace(trackNameShort))
+                            {
+                                route.Name = trackNameShort.Trim();
+                                foundRouteNameInFile = true;
+                            }
                             break;
                         case "trkseg":
                             inTrackSegment = true;
