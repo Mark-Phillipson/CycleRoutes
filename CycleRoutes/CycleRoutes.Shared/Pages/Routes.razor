@@ -214,7 +214,8 @@
                             {
                                 <iframe src="@streetViewUrl" 
                                         width="100%" height="400" style="border: none;"
-                                        title="Google Street View"></iframe>
+                                        title="Google Street View" 
+                                        allowfullscreen="true"></iframe>
                                 <div class="position-absolute top-0 start-50 translate-middle-x m-2">
                                     <small class="badge bg-secondary">
                                         @currentPoint.Latitude.ToString("F6"), @currentPoint.Longitude.ToString("F6")
@@ -234,7 +235,8 @@
                                 {
                                     <iframe src="@fallbackMapUrl" 
                                             width="100%" height="400" style="border: none;"
-                                            title="Google Maps - Fallback View"></iframe>
+                                            title="Google Maps - Fallback View" 
+                                            allowfullscreen="true"></iframe>
                                 }
                                 else
                                 {
