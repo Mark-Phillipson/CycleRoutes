@@ -23,6 +23,7 @@ public static class MauiProgram
         builder.Services.AddScoped<IRouteService, RouteService>();
         builder.Services.AddScoped<IStreetViewService, StreetViewService>();
         builder.Services.AddScoped<IGoogleMapsService, GoogleMapsService>();
+        builder.Services.AddScoped<IThemeService, ThemeService>();
 
         builder.Services.AddMauiBlazorWebView();
 

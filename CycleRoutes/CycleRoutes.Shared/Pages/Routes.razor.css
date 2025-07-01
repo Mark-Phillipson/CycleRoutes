@@ -1,0 +1,53 @@
+/* Routes page specific dark mode styling */
+.route-management-panel .card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+.route-management-panel .card-header {
+    background-color: var(--nav-bg) !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+.route-management-panel .card-body {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Route cards in the saved routes list */
+.route-card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+.route-card:hover {
+    background-color: var(--button-hover-bg) !important;
+    border-color: var(--nav-active-bg) !important;
+}
+
+/* Route details card */
+.route-details-card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Progress section styling */
+.progress-section {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Map and street view containers */
+.map-container,
+.street-view-container {
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Ensure all text elements use theme colors */
+.route-management-panel h5,
+.route-management-panel p,
+.route-management-panel label {
+    color: var(--text-color) !important;
+}

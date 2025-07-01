@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject IThemeService ThemeService
+@implements IDisposable
 
 <div class="page">
     <main>
@@ -9,6 +11,16 @@
                 <a href="/routes" class="nav-link @(IsActive("/routes") ? "active" : "")">Routes</a>
             </div>
             <div class="app-info">
+                <button class="theme-toggle" @onclick="ToggleTheme" title="@(ThemeService.IsDarkMode ? "Switch to light mode" : "Switch to dark mode")">
+                    @if (ThemeService.IsDarkMode)
+                    {
+                        <span class="theme-icon">☀️</span>
+                    }
+                    else
+                    {
+                        <span class="theme-icon">🌙</span>
+                    }
+                </button>
                 <span class="app-title">CycleRoutes</span>
             </div>
         </div>
@@ -26,6 +38,22 @@
 </div>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ThemeService.InitializeAsync();
+        ThemeService.ThemeChanged += OnThemeChanged;
+    }
+
+    private void OnThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ToggleTheme()
+    {
+        await ThemeService.ToggleThemeAsync();
+    }
+
     private bool IsActive(string path)
     {
         var currentPath = new Uri(Navigation.Uri).AbsolutePath;
@@ -34,5 +62,10 @@
             return currentPath == "/";
         }
         return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void Dispose()
+    {
+        ThemeService.ThemeChanged -= OnThemeChanged;
     }
 }

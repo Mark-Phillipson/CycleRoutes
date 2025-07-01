@@ -1,5 +1,39 @@
+/* CSS Custom Properties for theming */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --border-color: #d6d5d5;
+    --nav-bg: #f7f7f7;
+    --nav-hover-bg: #e3f2fd;
+    --nav-active-bg: #0066cc;
+    --nav-active-text: #ffffff;
+    --button-border: #d6d5d5;
+    --button-hover-bg: #f0f0f0;
+    --input-bg: #ffffff;
+    --card-bg: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --border-color: #404040;
+    --nav-bg: #1e1e1e;
+    --nav-hover-bg: #333333;
+    --nav-active-bg: #0088ff;
+    --nav-active-text: #ffffff;
+    --button-border: #404040;
+    --button-hover-bg: #333333;
+    --input-bg: #1e1e1e;
+    --card-bg: #1e1e1e;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a, .btn-link {
@@ -8,8 +42,8 @@ a, .btn-link {
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: var(--nav-active-bg, #1b6ec2);
+    border-color: var(--nav-active-bg, #1861ac);
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -33,11 +67,15 @@ h1:focus {
 }
 
 .validation-message {
-    color: #e50000;
+    color: #ff6b6b;
+}
+
+[data-theme="dark"] .validation-message {
+    color: #ff8a80;
 }
 
 .blazor-error-boundary {
-    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA9NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
     padding: 1rem 1rem 1rem 3.7rem;
     color: white;
 }
@@ -89,7 +127,7 @@ h1:focus {
 }
 
 .bi-box-arrow-up-right {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-box-arrow-up-right' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-box-arrow-up-right' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
 }
 
 .bi-map-nav-menu {
@@ -112,59 +150,252 @@ h1:focus {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-fast-forward' viewBox='0 0 16 16'%3E%3Cpath d='M6.804 8 1 4.633v6.734L6.804 8Zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696L7.596 7.304ZM14.804 8 9 4.633v6.734L14.804 8Zm.792-.696a.802.802 0 0 1 0 1.392L9.233 12.388C8.713 12.69 8 12.345 8 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z'/%3E%3C/svg%3E");
 }
 
-/* Route Management Panel Collapse Animation */
-.route-management-panel {
-    transition: all 0.3s ease-in-out;
-    overflow: hidden;
+/* Dark mode icon fixes - ensure icons are visible */
+[data-theme="dark"] .bi-chevron-right {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-chevron-right' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") !important;
 }
 
-.route-management-panel.collapsed {
-    transform: translateX(-5px);
+[data-theme="dark"] .bi-chevron-left {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-chevron-left' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E") !important;
 }
 
-.route-management-panel .card {
-    transition: all 0.3s ease-in-out;
+[data-theme="dark"] .bi-chevron-up {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-chevron-up' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z'/%3E%3C/svg%3E") !important;
 }
 
-.route-management-toggle {
-    transition: all 0.2s ease-in-out;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+[data-theme="dark"] .bi-play-fill {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-play-fill' viewBox='0 0 16 16'%3E%3Cpath d='m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z'/%3E%3C/svg%3E") !important;
 }
 
-.route-management-toggle:hover {
-    transform: scale(1.1);
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
-    color: white;
+[data-theme="dark"] .bi-pause-fill {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-pause-fill' viewBox='0 0 16 16'%3E%3Cpath d='M5.5 3.5A1.5 1.5 0 0 1 7 2h2a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 9 14H7a1.5 1.5 0 0 1-1.5-1.5v-9z'/%3E%3C/svg%3E") !important;
 }
 
-.route-management-toggle i {
-    transition: transform 0.2s ease-in-out;
+[data-theme="dark"] .bi-stop-fill {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-stop-fill' viewBox='0 0 16 16'%3E%3Cpath d='M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z'/%3E%3C/svg%3E") !important;
 }
 
-.route-management-toggle:hover i {
-    transform: scale(1.3);
+[data-theme="dark"] .bi-arrow-clockwise {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-arrow-clockwise' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z'/%3E%3Cpath d='M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z'/%3E%3C/svg%3E") !important;
 }
 
-/* Clickable progress bar styling */
-.clickable-progress {
-    transition: all 0.2s ease-in-out;
+[data-theme="dark"] .bi-box-arrow-up-right {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-box-arrow-up-right' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E") !important;
 }
 
-.clickable-progress:hover {
-    opacity: 0.9;
-    transform: scale(1.01);
+[data-theme="dark"] .bi-play {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-play' viewBox='0 0 16 16'%3E%3Cpath d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z'/%3E%3Cpath d='M6.271 5.055a.5.5 0 0 1 .52.014L11 7.055a.5.5 0 0 1 0 .89L6.791 9.931a.5.5 0 0 1-.791-.39V5.434a.5.5 0 0 1 .271-.379z'/%3E%3C/svg%3E") !important;
 }
 
-.clickable-progress .progress-bar {
-    transition: all 0.3s ease-in-out;
+[data-theme="dark"] .bi-pause {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-pause' viewBox='0 0 16 16'%3E%3Cpath d='M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z'/%3E%3C/svg%3E") !important;
 }
 
-.clickable-progress:hover .progress-bar {
-    box-shadow: 0 0 8px rgba(13, 110, 253, 0.3);
+[data-theme="dark"] .bi-stop {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-stop' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H5z'/%3E%3C/svg%3E") !important;
+}
+
+[data-theme="dark"] .bi-fast-forward {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e0e0e0' class='bi bi-fast-forward' viewBox='0 0 16 16'%3E%3Cpath d='M6.804 8 1 4.633v6.734L6.804 8Zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696L7.596 7.304ZM14.804 8 9 4.633v6.734L14.804 8Zm.792-.696a.802.802 0 0 1 0 1.392L9.233 12.388C8.713 12.69 8 12.345 8 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z'/%3E%3C/svg%3E") !important;
+}
+
+/* Specific fixes for file input and saved routes sections */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] input[type="file"],
+[data-theme="dark"] .form-control[type="file"] {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .form-control::file-selector-button {
+    background-color: var(--button-hover-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+    margin-right: 1rem;
+    padding: 0.375rem 0.75rem;
+}
+
+[data-theme="dark"] .form-control::-webkit-file-upload-button {
+    background-color: var(--button-hover-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+    margin-right: 1rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Target the saved routes section specifically */
+[data-theme="dark"] .route-management-panel,
+html[data-theme="dark"] .route-management-panel,
+body[data-theme="dark"] .route-management-panel {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Force all sections within the route management panel */
+html[data-theme="dark"] .route-management-panel > *,
+body[data-theme="dark"] .route-management-panel > *,
+[data-theme="dark"] .route-management-panel > * {
+    color: var(--text-color) !important;
+}
+
+/* Target any remaining white sections */
+[data-theme="dark"] .mb-3,
+[data-theme="dark"] .saved-routes-section,
+[data-theme="dark"] .upload-section {
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+}
+
+/* Force any div elements that might have default backgrounds */
+html[data-theme="dark"] div,
+body[data-theme="dark"] div {
+    background-color: transparent;
+    color: inherit;
+}
+
+html[data-theme="dark"] div.card,
+body[data-theme="dark"] div.card,
+html[data-theme="dark"] div.card-body,
+body[data-theme="dark"] div.card-body,
+html[data-theme="dark"] div.card-header,
+body[data-theme="dark"] div.card-header {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Add a CSS rule to verify dark theme is active */
+html[data-theme="dark"]::before {
+    content: "DARK_MODE_ACTIVE";
+    display: none;
+}
+
+/* Emergency fallback - if data-theme isn't working, use class-based approach */
+.dark-theme,
+.dark-theme .card,
+.dark-theme .card-body,
+.dark-theme .card-header,
+.dark-theme .bg-light,
+.dark-theme .bg-white {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Ultimate Bootstrap dark mode override - highest specificity */
+html[data-theme="dark"] body,
+html[data-theme="dark"] body .container,
+html[data-theme="dark"] body .container-fluid,
+html[data-theme="dark"] body .card,
+html[data-theme="dark"] body .card.h-100,
+html[data-theme="dark"] body div.card,
+html[data-theme="dark"] body .card-body,
+html[data-theme="dark"] body .card-header,
+html[data-theme="dark"] body .bg-light,
+html[data-theme="dark"] body .bg-white,
+body[data-theme="dark"] .card,
+body[data-theme="dark"] .card.h-100,
+body[data-theme="dark"] div.card,
+body[data-theme="dark"] .card-body,
+body[data-theme="dark"] .card-header,
+body[data-theme="dark"] .bg-light,
+body[data-theme="dark"] .bg-white {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Ensure the root elements use dark theme */
+html[data-theme="dark"],
+body[data-theme="dark"] {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* More specific targeting for problematic elements */
+html[data-theme="dark"] .route-management-panel .card,
+html[data-theme="dark"] .route-management-panel .card-header,
+html[data-theme="dark"] .route-management-panel .card-body,
+body[data-theme="dark"] .route-management-panel .card,
+body[data-theme="dark"] .route-management-panel .card-header,
+body[data-theme="dark"] .route-management-panel .card-body {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Aggressive overrides for any remaining white backgrounds */
+[data-theme="dark"] .route-management-panel .alert,
+[data-theme="dark"] .route-management-panel .alert-success,
+[data-theme="dark"] .route-management-panel .card,
+[data-theme="dark"] .route-management-panel .card-body,
+[data-theme="dark"] .route-management-panel .form-control,
+[data-theme="dark"] .route-management-panel input,
+[data-theme="dark"] .route-management-panel .btn,
+[data-theme="dark"] .route-management-panel .mb-3,
+[data-theme="dark"] .route-management-panel div {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Ensure the route management panel container itself is dark */
+[data-theme="dark"] .route-management-panel.col-md-4,
+html[data-theme="dark"] .route-management-panel.col-md-4,
+body[data-theme="dark"] .route-management-panel.col-md-4 {
+    background-color: transparent !important;
+}
+
+/* Target any Bootstrap utility classes that might add white backgrounds */
+[data-theme="dark"] .bg-body,
+[data-theme="dark"] .bg-body-secondary,
+[data-theme="dark"] .bg-body-tertiary {
+    background-color: var(--card-bg) !important;
+}
+
+/* Force any sections that might have inherited white backgrounds */
+html[data-theme="dark"] section,
+body[data-theme="dark"] section,
+html[data-theme="dark"] .section,
+body[data-theme="dark"] .section {
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+}
+
+/* Progress bar theming */
+.progress {
+    background-color: var(--border-color);
+    border: 1px solid var(--border-color);
+}
+
+.progress-bar {
+    background-color: var(--nav-active-bg);
+    color: var(--nav-active-text);
+}
+
+[data-theme="dark"] .progress {
+    background-color: var(--border-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .progress-bar {
+    background-color: var(--nav-active-bg) !important;
+    color: var(--nav-active-text) !important;
+}
+
+/* Ensure progress bar text is visible */
+[data-theme="dark"] .progress-bar-text,
+[data-theme="dark"] .progress .text-dark,
+[data-theme="dark"] .progress .text-muted {
+    color: var(--text-color) !important;
+}
+
+/* Nuclear option for any remaining elements */
+[data-theme="dark"] *:not(.card):not(.card-body):not(.card-header):not(.btn):not(.badge):not(.alert) {
+    background-color: transparent;
 }

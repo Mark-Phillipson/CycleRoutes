@@ -1,0 +1,47 @@
+/* Home page specific dark mode styling */
+.home-feature-card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+    transition: all 0.3s ease;
+}
+
+.home-feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+/* Pro tip section */
+.pro-tip-section {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+.pro-tip-section h4 {
+    color: var(--text-color) !important;
+}
+
+.pro-tip-section p {
+    color: var(--text-color) !important;
+}
+
+/* How it works section */
+.how-it-works-step {
+    color: var(--text-color) !important;
+}
+
+.how-it-works-step h5 {
+    color: var(--text-color) !important;
+}
+
+.how-it-works-step p {
+    color: var(--text-color) !important;
+    opacity: 0.8;
+}
+
+/* Badge styling for numbered steps */
+.step-badge {
+    background-color: var(--nav-active-bg) !important;
+    color: var(--nav-active-text) !important;
+}

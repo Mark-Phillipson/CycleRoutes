@@ -22,6 +22,7 @@ builder.Services.AddSingleton<IFormFactor, FormFactor>();
 builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IStreetViewService, StreetViewService>();
 builder.Services.AddScoped<IGoogleMapsService, GoogleMapsService>();
+builder.Services.AddScoped<IThemeService, ThemeService>();
 builder.Services.AddSingleton<ApiKeyTester>();
 
 // Add detailed circuit errors for Blazor Server in development
