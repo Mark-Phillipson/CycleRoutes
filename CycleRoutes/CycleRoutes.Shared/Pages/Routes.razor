@@ -212,27 +212,31 @@
                             var streetViewUrl = StreetViewService.GetStreetViewEmbedUrl(currentPoint.Latitude, currentPoint.Longitude, 0);
                             if (!string.IsNullOrEmpty(streetViewUrl))
                             {
-                                <!-- Force iframe reload using unique key attribute to prevent caching issues in production -->
-                                <iframe src="@streetViewUrl" 
-                                        key="@($"streetview-{currentPointIndex}-{streetViewRefreshCounter}")"
-                                        width="100%" height="400" style="border: none;"
-                                        title="Google Street View" 
-                                        allowfullscreen="true"
-                                        onload="console.log('Street View iframe loaded successfully for point @currentPointIndex')"
-                                        onerror="console.error('Street View iframe failed to load for point @currentPointIndex')"></iframe>
-                                <div class="position-absolute top-0 start-50 translate-middle-x m-2">
-                                    <small class="badge bg-secondary">
-                                        @currentPoint.Latitude.ToString("F6"), @currentPoint.Longitude.ToString("F6")
-                                    </small>
-                                </div>
-                                @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-                                {
-                                    <div class="position-absolute bottom-0 start-0 m-2">
-                                        <small class="badge bg-info">
-                                            Debug: URL generated
+                                <!-- Force iframe reload using unique key and container replacement for production caching issues -->
+                                var iframeId = $"streetview-iframe-{currentPointIndex}-{streetViewRefreshCounter}";
+                                <div id="streetview-container-@currentPointIndex-@streetViewRefreshCounter" class="position-relative">
+                                    <iframe id="@iframeId"
+                                            src="@streetViewUrl" 
+                                            key="@($"streetview-{currentPointIndex}-{streetViewRefreshCounter}")"
+                                            width="100%" height="400" style="border: none;"
+                                            title="Google Street View" 
+                                            allowfullscreen="true"
+                                            onload="console.log('Street View iframe loaded successfully for point @currentPointIndex, refresh: @streetViewRefreshCounter')"
+                                            onerror="console.error('Street View iframe failed to load for point @currentPointIndex')"></iframe>
+                                    <div class="position-absolute top-0 start-50 translate-middle-x m-2">
+                                        <small class="badge bg-secondary">
+                                            @currentPoint.Latitude.ToString("F6"), @currentPoint.Longitude.ToString("F6")
                                         </small>
                                     </div>
-                                }
+                                    @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                                    {
+                                        <div class="position-absolute bottom-0 start-0 m-2">
+                                            <small class="badge bg-info">
+                                                Debug: Point @currentPointIndex, Refresh @streetViewRefreshCounter
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
                             }
                             else
                             {
@@ -768,6 +772,7 @@
             currentPointIndex++;
             streetViewRefreshCounter++; // Force iframe refresh
             StateHasChanged();
+            await ForceStreetViewRefresh();
             await UpdateMapPosition();
         }
     }
@@ -779,6 +784,7 @@
             currentPointIndex--;
             streetViewRefreshCounter++; // Force iframe refresh
             StateHasChanged();
+            await ForceStreetViewRefresh();
             await UpdateMapPosition();
         }
     }
@@ -789,11 +795,28 @@
 
         try
         {
-            // Calculate the clicked percentage based on the click position
-            var clickPercentage = await JSRuntime.InvokeAsync<double>("calculateClickPercentage", e, "clickable-progress");
-            
-            if (clickPercentage >= 0 && clickPercentage <= 1)
+            // Get the progress bar element and calculate click percentage
+            var progressBarRect = await JSRuntime.InvokeAsync<object>("eval", @"
+                (function() {
+                    const progressBar = document.getElementById('clickable-progress');
+                    if (!progressBar) return null;
+                    const rect = progressBar.getBoundingClientRect();
+                    return {
+                        left: rect.left,
+                        width: rect.width
+                    };
+                })()
+            ");
+
+            if (progressBarRect != null)
             {
+                // Calculate click percentage manually
+                var rect = System.Text.Json.JsonSerializer.Deserialize<dynamic>(progressBarRect.ToString()!);
+                var left = ((System.Text.Json.JsonElement)rect).GetProperty("left").GetDouble();
+                var width = ((System.Text.Json.JsonElement)rect).GetProperty("width").GetDouble();
+                
+                var clickPercentage = Math.Max(0, Math.Min(1, (e.ClientX - left) / width));
+                
                 // Calculate the target point index based on the clicked percentage
                 var targetIndex = (int)Math.Round(clickPercentage * (currentRoute.Points.Count - 1));
                 
@@ -806,6 +829,7 @@
                     currentPointIndex = targetIndex;
                     streetViewRefreshCounter++; // Force iframe refresh
                     StateHasChanged();
+                    await ForceStreetViewRefresh();
                     await UpdateMapPosition();
                 }
             }
@@ -817,11 +841,43 @@
         }
     }
 
-    private void RefreshStreetView()
+    private async void RefreshStreetView()
     {
         // Force a re-render of the Street View by incrementing refresh counter and triggering a state change
         streetViewRefreshCounter++;
         StateHasChanged();
+        await ForceStreetViewRefresh();
+    }
+
+    private async Task ForceStreetViewRefresh()
+    {
+        // Give the DOM a moment to update with the new iframe
+        await Task.Delay(100);
+        
+        try
+        {
+            // Try to force iframe refresh by manipulating it directly
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                (function() {
+                    // Find any existing Street View iframes and force reload
+                    const iframes = document.querySelectorAll('iframe[id*=""streetview-iframe""]');
+                    iframes.forEach(iframe => {
+                        if (iframe.src && iframe.src.includes('streetview')) {
+                            console.log('Forcing iframe refresh for:', iframe.id);
+                            const originalSrc = iframe.src;
+                            iframe.src = 'about:blank';
+                            setTimeout(() => {
+                                iframe.src = originalSrc;
+                            }, 50);
+                        }
+                    });
+                })();
+            ");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error forcing Street View refresh: {ex.Message}");
+        }
     }
 
     [JSInvokable]
@@ -841,6 +897,7 @@
                 _instance.currentPointIndex = pointIndex;
                 _instance.streetViewRefreshCounter++; // Force iframe refresh
                 _instance.StateHasChanged();
+                await _instance.ForceStreetViewRefresh();
                 await _instance.UpdateMapPosition();
             }
         });
