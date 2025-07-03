@@ -45,8 +45,9 @@
 
                         @if (!string.IsNullOrEmpty(statusMessage))
                         {
-                            <div class="alert @(statusMessage.Contains("Error") ? "alert-danger" : "alert-success")" role="alert">
+                            <div class="alert @(statusMessage.Contains("Error") ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
                                 @statusMessage
+                                <button type="button" class="btn-close" @onclick="DismissAlert" aria-label="Close"></button>
                             </div>
                         }
 
@@ -146,11 +147,11 @@
                         <div class="d-flex align-items-center">
                             <!-- Auto-advance controls - always visible when route is loaded -->
                             <div class="btn-group me-2" role="group" aria-label="Auto-advance controls">
-                                <label class="btn btn-sm btn-outline-secondary d-flex align-items-center" style="min-width: 80px; height: 31px; cursor: default;">
+                                <label for="distanceSelect" class="btn btn-sm btn-outline-secondary d-flex align-items-center" style="min-width: 80px; height: 31px; cursor: pointer;">
                                     <SvgIcon Icon="rulers" CssClass="me-1" />
                                     <span class="d-none d-lg-inline">Distance:</span>
                                 </label>
-                                <select class="form-select form-select-sm" @bind="autoAdvanceDistanceMeters" style="width: 80px; height: 31px; font-size: 0.8rem;">
+                                <select id="distanceSelect" class="form-select form-select-sm" @bind="autoAdvanceDistanceMeters" style="width: 80px; height: 31px; font-size: 0.8rem;">
                                     <option value="10">10m</option>
                                     <option value="20">20m</option>
                                     <option value="30">30m</option>
@@ -162,11 +163,11 @@
                             </div>
                             
                             <div class="btn-group me-2" role="group" aria-label="Auto-advance delay">
-                                <label class="btn btn-sm btn-outline-secondary d-flex align-items-center" style="min-width: 70px; height: 31px; cursor: default;">
+                                <label for="delaySelect" class="btn btn-sm btn-outline-secondary d-flex align-items-center" style="min-width: 70px; height: 31px; cursor: pointer;">
                                     <SvgIcon Icon="clock" CssClass="me-1" />
                                     <span class="d-none d-lg-inline">Delay:</span>
                                 </label>
-                                <select class="form-select form-select-sm" @bind="autoAdvanceIntervalSeconds" style="width: 70px; height: 31px; font-size: 0.8rem;">
+                                <select id="delaySelect" class="form-select form-select-sm" @bind="autoAdvanceIntervalSeconds" style="width: 70px; height: 31px; font-size: 0.8rem;">
                                     <option value="1">1s</option>
                                     <option value="2">2s</option>
                                     <option value="3">3s</option>
@@ -451,9 +452,44 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && currentRoute != null)
+        if (firstRender)
         {
-            await InitializeMap();
+            // Add JavaScript to handle dropdown opening when labels are clicked
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                // Function to open select dropdown
+                function openSelectDropdown(selectElement) {
+                    if (selectElement) {
+                        selectElement.focus();
+                        selectElement.click();
+                        // For some browsers, we need to dispatch a mousedown event
+                        const event = new MouseEvent('mousedown', { bubbles: true });
+                        selectElement.dispatchEvent(event);
+                    }
+                }
+
+                // Add event listeners for distance and delay labels
+                const distanceLabel = document.querySelector('label[for=""distanceSelect""]');
+                const delayLabel = document.querySelector('label[for=""delaySelect""]');
+                
+                if (distanceLabel) {
+                    distanceLabel.addEventListener('click', function() {
+                        const select = document.getElementById('distanceSelect');
+                        openSelectDropdown(select);
+                    });
+                }
+                
+                if (delayLabel) {
+                    delayLabel.addEventListener('click', function() {
+                        const select = document.getElementById('delaySelect');
+                        openSelectDropdown(select);
+                    });
+                }
+            ");
+            
+            if (currentRoute != null)
+            {
+                await InitializeMap();
+            }
         }
     }
 
@@ -626,6 +662,12 @@
         {
             Console.WriteLine($"Error updating map position: {ex.Message}");
         }
+    }
+
+    private void DismissAlert()
+    {
+        statusMessage = string.Empty;
+        StateHasChanged();
     }
 
     private void ToggleRouteManagement()
@@ -879,7 +921,7 @@
             var currentPoint = currentRoute.Points[i];
             var nextPoint = currentRoute.Points[i + 1];
             
-            // Calculate distance between consecutive points using Haversine formula
+            // Calculate distance between current point and next point using Haversine formula
             var distance = CalculateDistance(currentPoint.Latitude, currentPoint.Longitude, 
                                            nextPoint.Latitude, nextPoint.Longitude);
             
