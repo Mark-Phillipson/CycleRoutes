@@ -13,7 +13,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center @(isRouteManagementCollapsed ? "px-1 py-2" : "")">
                     <h5 class="mb-0 @(isRouteManagementCollapsed ? "d-none" : "")">Route Management</h5>
-                    <button class="btn btn-sm btn-outline-secondary route-management-toggle @(isRouteManagementCollapsed ? "mx-auto" : "")" @onclick="ToggleRouteManagement" title="@(isRouteManagementCollapsed ? "Expand Panel" : "Collapse Panel")">
+                    <button class="btn btn-sm btn-outline-secondary route-management-toggle @(isRouteManagementCollapsed ? "w-100" : "")" @onclick="ToggleRouteManagement" title="@(isRouteManagementCollapsed ? "Expand Panel" : "Collapse Panel")" style="@(isRouteManagementCollapsed ? "min-height: 40px;" : "")">
                         @if (isRouteManagementCollapsed)
                         {
                             <SvgIcon Icon="chevron-right" Style="transform: scale(1.2);" />
@@ -176,6 +176,17 @@
                                 </select>
                             </div>
                             
+                            <!-- Speed Display -->
+                            <div class="btn-group me-2" role="group" aria-label="Current speed">
+                                <label class="btn btn-sm btn-outline-info d-flex align-items-center" style="min-width: 90px; height: 31px; cursor: default;">
+                                    <SvgIcon Icon="speedometer2" CssClass="me-1" />
+                                    <span class="d-none d-lg-inline">Speed:</span>
+                                </label>
+                                <div class="btn btn-sm btn-outline-info d-flex align-items-center" style="min-width: 80px; height: 31px; cursor: default; font-size: 0.8rem;">
+                                    @CalculateCurrentSpeed().ToString("F1") mph
+                                </div>
+                            </div>
+                            
                             @if (isNavigating)
                             {
                                 <div class="btn-group me-2" role="group" aria-label="Navigation controls">
@@ -225,7 +236,8 @@
                     <div class="card-body p-0">
                         @if (StreetViewService.HasApiKey)
                         {
-                            var streetViewUrl = StreetViewService.GetStreetViewEmbedUrl(currentPoint.Latitude, currentPoint.Longitude, 0);
+                            var heading = CalculateOptimalHeading(currentPoint, currentPointIndex);
+                            var streetViewUrl = StreetViewService.GetStreetViewEmbedUrl(currentPoint.Latitude, currentPoint.Longitude, heading, 75, -5);
                             if (!string.IsNullOrEmpty(streetViewUrl))
                             {
                                 <!-- Force iframe reload using unique key and container replacement for production caching issues -->
@@ -894,6 +906,55 @@
                 Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
         var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
         return R * c;
+    }
+
+    private double CalculateOptimalHeading(RoutePoint currentPoint, int pointIndex)
+    {
+        if (currentRoute == null || currentRoute.Points.Count < 2)
+            return 0; // Default heading if no route context
+
+        RoutePoint? targetPoint = null;
+        
+        // Try to find the next point in the direction of travel
+        if (pointIndex < currentRoute.Points.Count - 1)
+        {
+            targetPoint = currentRoute.Points[pointIndex + 1];
+        }
+        // If we're at the last point, use the previous point and reverse the bearing
+        else if (pointIndex > 0)
+        {
+            var previousPoint = currentRoute.Points[pointIndex - 1];
+            var reverseBearing = StreetViewService.CalculateBearing(previousPoint.Latitude, previousPoint.Longitude, 
+                                                                 currentPoint.Latitude, currentPoint.Longitude);
+            return reverseBearing;
+        }
+        
+        // If we have a target point, calculate the bearing to it
+        if (targetPoint != null)
+        {
+            return StreetViewService.CalculateBearing(currentPoint.Latitude, currentPoint.Longitude, 
+                                                    targetPoint.Latitude, targetPoint.Longitude);
+        }
+        
+        // Fallback to default heading
+        return 0;
+    }
+
+    private double CalculateCurrentSpeed()
+    {
+        // Calculate speed based on current auto-advance settings
+        // Speed = Distance / Time
+        
+        // Convert meters to miles: 1 meter = 0.000621371 miles
+        var distanceMiles = autoAdvanceDistanceMeters * 0.000621371;
+        
+        // Convert seconds to hours: 1 second = 1/3600 hours
+        var timeHours = autoAdvanceIntervalSeconds / 3600.0;
+        
+        // Calculate miles per hour
+        var mph = distanceMiles / timeHours;
+        
+        return mph;
     }
 
     private async Task OnProgressBarClick(MouseEventArgs e)
