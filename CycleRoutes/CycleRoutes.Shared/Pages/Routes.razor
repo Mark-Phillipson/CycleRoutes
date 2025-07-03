@@ -16,11 +16,11 @@
                     <button class="btn btn-sm btn-outline-secondary route-management-toggle @(isRouteManagementCollapsed ? "mx-auto" : "")" @onclick="ToggleRouteManagement" title="@(isRouteManagementCollapsed ? "Expand Panel" : "Collapse Panel")">
                         @if (isRouteManagementCollapsed)
                         {
-                            <i class="bi bi-chevron-right" style="transform: scale(1.2);"></i>
+                            <SvgIcon Icon="chevron-right" Style="transform: scale(1.2);" />
                         }
                         else
                         {
-                            <i class="bi bi-chevron-left" style="transform: scale(1.2);"></i>
+                            <SvgIcon Icon="chevron-left" Style="transform: scale(1.2);" />
                         }
                     </button>
                 </div>
@@ -118,13 +118,13 @@
                         @if (!isNavigating)
                         {
                             <button class="btn btn-success" @onclick="StartRoute">
-                                <i class="bi bi-play-fill"></i> Start Navigation
+                                <SvgIcon Icon="play-fill" CssClass="me-1" /> Start Navigation
                             </button>
                         }
                         else
                         {
                             <button class="btn btn-danger me-2" @onclick="StopRoute">
-                                <i class="bi bi-stop-fill"></i> Stop
+                                <SvgIcon Icon="stop-fill" CssClass="me-1" /> Stop
                             </button>
                             <div class="mt-2">
                                 <small class="text-muted">Point @(currentPointIndex + 1) of @currentRoute.Points.Count</small>
@@ -144,13 +144,29 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h6 class="mb-0">Street View</h6>
                         <div class="d-flex align-items-center">
-                            <!-- Auto-advance delay control - always visible when route is loaded -->
-                            <div class="btn-group me-2" role="group" aria-label="Auto-advance delay">
+                            <!-- Auto-advance controls - always visible when route is loaded -->
+                            <div class="btn-group me-2" role="group" aria-label="Auto-advance controls">
                                 <label class="btn btn-sm btn-outline-secondary d-flex align-items-center" style="min-width: 80px; height: 31px; cursor: default;">
-                                    <i class="bi bi-clock me-1"></i>
+                                    <SvgIcon Icon="rulers" CssClass="me-1" />
+                                    <span class="d-none d-lg-inline">Distance:</span>
+                                </label>
+                                <select class="form-select form-select-sm" @bind="autoAdvanceDistanceMeters" style="width: 80px; height: 31px; font-size: 0.8rem;">
+                                    <option value="10">10m</option>
+                                    <option value="20">20m</option>
+                                    <option value="30">30m</option>
+                                    <option value="50">50m</option>
+                                    <option value="100">100m</option>
+                                    <option value="200">200m</option>
+                                    <option value="500">500m</option>
+                                </select>
+                            </div>
+                            
+                            <div class="btn-group me-2" role="group" aria-label="Auto-advance delay">
+                                <label class="btn btn-sm btn-outline-secondary d-flex align-items-center" style="min-width: 70px; height: 31px; cursor: default;">
+                                    <SvgIcon Icon="clock" CssClass="me-1" />
                                     <span class="d-none d-lg-inline">Delay:</span>
                                 </label>
-                                <select class="form-select form-select-sm" @bind="autoAdvanceIntervalSeconds" style="width: 80px; height: 31px; font-size: 0.8rem;">
+                                <select class="form-select form-select-sm" @bind="autoAdvanceIntervalSeconds" style="width: 70px; height: 31px; font-size: 0.8rem;">
                                     <option value="1">1s</option>
                                     <option value="2">2s</option>
                                     <option value="3">3s</option>
@@ -163,8 +179,8 @@
                             @if (isNavigating)
                             {
                                 <div class="btn-group me-2" role="group" aria-label="Navigation controls">
-                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="PreviousPoint" disabled="@(currentPointIndex == 0)" title="Previous Point" style="min-width: 36px; height: 31px;">
-                                        <i class="bi bi-chevron-left"></i>
+                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="PreviousDistance" disabled="@(currentPointIndex == 0)" title="Previous @(autoAdvanceDistanceMeters)m" style="min-width: 36px; height: 31px;">
+                                        <SvgIcon Icon="chevron-left" />
                                     </button>
                                     
                                     @if (isAutoAdvancing)
@@ -172,37 +188,37 @@
                                         @if (isAutoAdvancePaused)
                                         {
                                             <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="ResumeAutoAdvance" title="Resume Auto Advance" style="min-width: 70px; height: 31px;">
-                                                <i class="bi bi-play me-1"></i>
+                                                <SvgIcon Icon="play" CssClass="me-1" />
                                                 <span class="d-none d-md-inline">Resume</span>
                                             </button>
                                         }
                                         else
                                         {
                                             <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="PauseAutoAdvance" title="Pause Auto Advance" style="min-width: 70px; height: 31px;">
-                                                <i class="bi bi-pause me-1"></i>
+                                                <SvgIcon Icon="pause" CssClass="me-1" />
                                                 <span class="d-none d-md-inline">Pause</span>
                                             </button>
                                         }
                                         <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="StopAutoAdvance" title="Stop Auto Advance" style="min-width: 60px; height: 31px;">
-                                            <i class="bi bi-stop me-1"></i>
+                                            <SvgIcon Icon="stop" CssClass="me-1" />
                                             <span class="d-none d-lg-inline">Stop</span>
                                         </button>
                                     }
                                     else
                                     {
                                         <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="StartAutoAdvance" title="Start Auto Advance" style="min-width: 60px; height: 31px;">
-                                            <i class="bi bi-fast-forward me-1"></i>
+                                            <SvgIcon Icon="fast-forward" CssClass="me-1" />
                                             <span class="d-none d-md-inline">Auto</span>
                                         </button>
                                     }
                                 </div>
                                     
-                                <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="NextPoint" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)" title="Next Point" style="min-width: 36px; height: 31px;">
-                                    <i class="bi bi-chevron-right"></i>
+                                <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @onclick="NextDistance" disabled="@(currentPointIndex >= currentRoute.Points.Count - 1)" title="Next @(autoAdvanceDistanceMeters)m" style="min-width: 36px; height: 31px;">
+                                    <SvgIcon Icon="chevron-right" />
                                 </button>
                             }
                             <button class="btn btn-sm btn-outline-secondary" @onclick="RefreshStreetView" title="Refresh Street View">
-                                <i class="bi bi-arrow-clockwise"></i>
+                                <SvgIcon Icon="arrow-clockwise" />
                             </button>
                         </div>
                     </div>
@@ -386,6 +402,19 @@
             {
                 _autoAdvanceIntervalSeconds = value;
                 RestartAutoAdvanceTimerIfActive();
+            }
+        }
+    }
+    private int _autoAdvanceDistanceMeters = 30;
+    private int autoAdvanceDistanceMeters
+    {
+        get => _autoAdvanceDistanceMeters;
+        set
+        {
+            if (_autoAdvanceDistanceMeters != value)
+            {
+                _autoAdvanceDistanceMeters = value;
+                // No need to restart timer for distance changes
             }
         }
     }
@@ -744,7 +773,7 @@
             {
                 if (currentPointIndex < currentRoute.Points.Count - 1)
                 {
-                    NextPoint();
+                    NextDistance();
                 }
                 else
                 {
@@ -756,7 +785,7 @@
             {
                 if (currentPointIndex > 0)
                 {
-                    PreviousPoint();
+                    PreviousDistance();
                 }
                 else
                 {
@@ -767,26 +796,104 @@
         });
     }
 
-    private async void NextPoint()
+    private async void NextDistance()
     {
-        if (currentRoute != null && currentPointIndex < currentRoute.Points.Count - 1)
+        if (currentRoute == null || currentPointIndex >= currentRoute.Points.Count - 1)
+            return;
+
+        var targetIndex = FindNextPointByDistance(currentPointIndex, autoAdvanceDistanceMeters);
+        if (targetIndex != currentPointIndex)
         {
-            currentPointIndex++;
+            currentPointIndex = targetIndex;
             streetViewRefreshCounter++; // Force iframe refresh
             StateHasChanged();
             await UpdateMapPosition();
         }
     }
 
-    private async void PreviousPoint()
+    private async void PreviousDistance()
     {
-        if (currentPointIndex > 0)
+        if (currentRoute == null || currentPointIndex <= 0)
+            return;
+
+        var targetIndex = FindPreviousPointByDistance(currentPointIndex, autoAdvanceDistanceMeters);
+        if (targetIndex != currentPointIndex)
         {
-            currentPointIndex--;
+            currentPointIndex = targetIndex;
             streetViewRefreshCounter++; // Force iframe refresh
             StateHasChanged();
             await UpdateMapPosition();
         }
+    }
+
+    private int FindNextPointByDistance(int startIndex, int targetDistanceMeters)
+    {
+        if (currentRoute == null || startIndex >= currentRoute.Points.Count - 1)
+            return startIndex;
+
+        var startPoint = currentRoute.Points[startIndex];
+        var accumulatedDistance = 0.0;
+
+        for (int i = startIndex + 1; i < currentRoute.Points.Count; i++)
+        {
+            var currentPoint = currentRoute.Points[i];
+            var previousPoint = currentRoute.Points[i - 1];
+            
+            // Calculate distance between consecutive points using Haversine formula
+            var distance = CalculateDistance(previousPoint.Latitude, previousPoint.Longitude, 
+                                           currentPoint.Latitude, currentPoint.Longitude);
+            
+            accumulatedDistance += distance;
+            
+            if (accumulatedDistance >= targetDistanceMeters)
+            {
+                return i;
+            }
+        }
+
+        // If we didn't reach the target distance, return the last point
+        return currentRoute.Points.Count - 1;
+    }
+
+    private int FindPreviousPointByDistance(int startIndex, int targetDistanceMeters)
+    {
+        if (currentRoute == null || startIndex <= 0)
+            return startIndex;
+
+        var accumulatedDistance = 0.0;
+
+        for (int i = startIndex - 1; i >= 0; i--)
+        {
+            var currentPoint = currentRoute.Points[i];
+            var nextPoint = currentRoute.Points[i + 1];
+            
+            // Calculate distance between consecutive points using Haversine formula
+            var distance = CalculateDistance(currentPoint.Latitude, currentPoint.Longitude, 
+                                           nextPoint.Latitude, nextPoint.Longitude);
+            
+            accumulatedDistance += distance;
+            
+            if (accumulatedDistance >= targetDistanceMeters)
+            {
+                return i;
+            }
+        }
+
+        // If we didn't reach the target distance, return the first point
+        return 0;
+    }
+
+    private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        // Haversine formula to calculate distance between two points on Earth
+        const double R = 6371000; // Earth's radius in meters
+        var dLat = (lat2 - lat1) * Math.PI / 180;
+        var dLon = (lon2 - lon1) * Math.PI / 180;
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c;
     }
 
     private async Task OnProgressBarClick(MouseEventArgs e)
