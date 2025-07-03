@@ -171,7 +171,7 @@ function initializeMap_{mapElementId}() {{
 
     // Create map centered on current point
     window.cycleRouteMap = new google.maps.Map(mapElement, {{
-        zoom: 15,
+        zoom: 16,
         center: {{
             lat: {currentPoint.Latitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)}, 
             lng: {currentPoint.Longitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)}
@@ -254,10 +254,13 @@ function initializeMap_{mapElementId}() {{
     routePath.forEach(point => bounds.extend(point));
     window.cycleRouteMap.fitBounds(bounds);
     
-    // Set a reasonable zoom level if the route is very short
+    // Set a good zoom level for detailed view while showing context
     google.maps.event.addListenerOnce(window.cycleRouteMap, 'bounds_changed', function() {{
-        if (window.cycleRouteMap.getZoom() > 18) {{
-            window.cycleRouteMap.setZoom(18);
+        if (window.cycleRouteMap.getZoom() < 16) {{
+            window.cycleRouteMap.setZoom(16);
+        }}
+        if (window.cycleRouteMap.getZoom() > 17) {{
+            window.cycleRouteMap.setZoom(17);
         }}
     }});
 }}
