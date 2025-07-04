@@ -401,6 +401,7 @@
     // Google Maps functionality
     private bool isMapLoading = true;
     private bool isMapInitialized = false;
+    private bool isComponentRendered = false;
 
     // Auto-advance functionality
     private bool isAutoAdvancing;
@@ -454,6 +455,8 @@
     {
         if (firstRender)
         {
+            isComponentRendered = true;
+            
             // Add JavaScript to handle dropdown opening when labels are clicked
             await JSRuntime.InvokeVoidAsync("eval", @"
                 // Function to open select dropdown
@@ -544,20 +547,31 @@
                 return;
             }
 
-            // Ensure the map container exists
-            var mapExists = await JSRuntime.InvokeAsync<bool>("eval", "document.getElementById('routeMap') !== null");
-            if (!mapExists)
+            // Check if we can safely call JSRuntime
+            try
             {
-                Console.WriteLine("Map container not found, waiting...");
-                await Task.Delay(1000);
-                mapExists = await JSRuntime.InvokeAsync<bool>("eval", "document.getElementById('routeMap') !== null");
+                // Ensure the map container exists
+                var mapExists = await JSRuntime.InvokeAsync<bool>("eval", "document.getElementById('routeMap') !== null");
                 if (!mapExists)
                 {
-                    Console.WriteLine("Map container still not found after delay");
-                    isMapLoading = false;
-                    StateHasChanged();
-                    return;
+                    Console.WriteLine("Map container not found, waiting...");
+                    await Task.Delay(1000);
+                    mapExists = await JSRuntime.InvokeAsync<bool>("eval", "document.getElementById('routeMap') !== null");
+                    if (!mapExists)
+                    {
+                        Console.WriteLine("Map container still not found after delay");
+                        isMapLoading = false;
+                        StateHasChanged();
+                        return;
+                    }
                 }
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("statically rendered"))
+            {
+                Console.WriteLine("Cannot initialize map yet - component still in static rendering phase");
+                isMapLoading = false;
+                StateHasChanged();
+                return;
             }
 
             Console.WriteLine("Map container found, proceeding with initialization...");
@@ -688,6 +702,7 @@
             
             StateHasChanged();
             
+            // Always try to initialize map when route changes, with proper checks inside InitializeMap
             if (currentRoute != null && GoogleMapsService.HasApiKey)
             {
                 // Add a small delay to ensure the DOM is ready

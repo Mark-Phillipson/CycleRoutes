@@ -120,15 +120,33 @@ function initializeMap_{mapElementId}() {{
         {string.Join(",\n        ", pathPoints)}
     ];
 
-    // Draw the route polyline
+    console.log('Route path points:', routePath.length);
+    console.log('First point:', routePath[0]);
+    console.log('Last point:', routePath[routePath.length - 1]);
+
+    // Draw the route polyline with direction arrows
     window.cycleRoutePolyline = new google.maps.Polyline({{
         path: routePath,
         geodesic: true,
         strokeColor: '#FF0000',
         strokeOpacity: 1.0,
-        strokeWeight: 3
+        strokeWeight: 3,
+        icons: [{{
+            icon: {{
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                scale: 3,
+                strokeColor: '#FF0000',
+                strokeWeight: 2,
+                fillColor: '#FF0000',
+                fillOpacity: 1
+            }},
+            offset: '0%',
+            repeat: '100px'
+        }}]
     }});
     window.cycleRoutePolyline.setMap(window.cycleRouteMap);
+
+    console.log('Polyline created and added to map');
 
     // Add start marker
     window.cycleRouteStartMarker = new google.maps.Marker({{
