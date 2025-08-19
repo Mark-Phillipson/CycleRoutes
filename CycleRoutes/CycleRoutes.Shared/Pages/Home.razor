@@ -84,9 +84,12 @@
             </div>
 
             <div class="mt-5 p-4 bg-light rounded pro-tip-section">
-                <h4>💡 Pro Tip: Google Maps API Key</h4>
+                <h4>💡 Google Maps API Key (required for Street View)</h4>
                 <p class="mb-2">
-                    For the best Street View experience, add a Google Maps API key to your <code>appsettings.json</code>:
+                    Embedded Google Street View requires a Google Maps API key. This key is usually added by a developer or configured during deployment. If your instance already has a key configured, you don't need to do anything.
+                </p>
+                <p class="mb-2">
+                    Developers: set or update the key in <code>appsettings.json</code> or provide it via environment variables (e.g. <code>GoogleMaps__ApiKey</code>). Example:
                 </p>
                 <pre class="bg-dark text-light p-3 rounded"><code>{
   "GoogleMaps": {
