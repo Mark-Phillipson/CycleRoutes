@@ -5,6 +5,11 @@ namespace CycleRoutes.Shared.Services;
 public interface IGoogleMapsService
 {
     /// <summary>
+    /// Sets the Google Maps API key at runtime
+    /// </summary>
+    void SetApiKey(string key);
+
+    /// <summary>
     /// Gets the Google Maps JavaScript API URL with the API key
     /// </summary>
     string GetMapsApiUrl();

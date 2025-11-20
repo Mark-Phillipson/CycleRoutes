@@ -21,6 +21,9 @@ public class GoogleMapsService : IGoogleMapsService
         _apiKey = _configuration["GoogleMaps:ApiKey"];
     }
 
+    // No-op for server-side
+    public void SetApiKey(string key) { }
+
     public bool HasApiKey => !string.IsNullOrEmpty(_apiKey);
 
     public string GetMapsApiUrl()

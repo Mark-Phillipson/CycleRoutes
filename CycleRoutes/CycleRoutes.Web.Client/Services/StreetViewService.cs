@@ -5,22 +5,30 @@ namespace CycleRoutes.Web.Client.Services;
 public class StreetViewService : IStreetViewService
 {
     private readonly HttpClient _httpClient;
+    private string? _apiKey;
 
     public StreetViewService(HttpClient httpClient)
     {
         _httpClient = httpClient;
+        _apiKey = null;
     }
 
-    public bool HasApiKey => true; // Always assume we have API key on client - server will handle it
+    // Allow setting API key at runtime
+    public void SetApiKey(string key)
+    {
+        _apiKey = key;
+    }
+
+    public bool HasApiKey => !string.IsNullOrEmpty(_apiKey);
 
     public Task<bool> ValidateApiKeyAsync()
     {
-        return Task.FromResult(true); // Let server handle validation
+        return Task.FromResult(HasApiKey);
     }
 
     public string GetApiKeyStatus()
     {
-        return "API key managed server-side";
+        return HasApiKey ? "API key is set" : "No API key configured";
     }
 
     public string GetStreetViewUrl(double latitude, double longitude, double heading = 0, int fov = 90, int pitch = 0)
@@ -31,8 +39,9 @@ public class StreetViewService : IStreetViewService
 
     public string GetStreetViewEmbedUrl(double latitude, double longitude, double heading = 0, int fov = 90, int pitch = 0)
     {
-        // Use a server endpoint that will proxy the Street View request with the API key
-        return $"/api/streetview?lat={latitude:F6}&lng={longitude:F6}&heading={heading:F1}&pitch={pitch}&fov={fov}";
+        if (!HasApiKey) return string.Empty;
+        // Use Google Maps Embed API directly
+        return $"https://www.google.com/maps/embed/v1/streetview?key={_apiKey}&location={latitude:F6},{longitude:F6}&heading={heading:F1}&pitch={pitch}&fov={fov}";
     }
 
     public double CalculateBearing(double lat1, double lon1, double lat2, double lon2)
@@ -48,8 +57,8 @@ public class StreetViewService : IStreetViewService
 
     public string GetFallbackMapUrl(double latitude, double longitude, int zoom = 18)
     {
-        // Use a server endpoint that will proxy the fallback map request with the API key
-        return $"/api/fallbackmap?lat={latitude:F6}&lng={longitude:F6}&zoom={zoom}";
+        if (!HasApiKey) return string.Empty;
+        return $"https://www.google.com/maps/embed/v1/view?key={_apiKey}&center={latitude:F6},{longitude:F6}&zoom={zoom}&maptype=roadmap";
     }
 
     private static double ToRadians(double degrees) => degrees * Math.PI / 180;

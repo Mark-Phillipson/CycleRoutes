@@ -1,13 +1,15 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject IThemeService ThemeService
+@inject CycleRoutes.Shared.Services.IGoogleMapsService GoogleMapsService
+@inject CycleRoutes.Shared.Services.IStreetViewService StreetViewService
 @implements IDisposable
 
 <div class="page">
     <main>
         <div class="top-row px-4">
             <div class="nav-links">
-                <a href="/" class="nav-link @(IsActive("/") ? "active" : "")">Home</a>
+                <a href="/" class="nav-link @(IsActive("/" ) ? "active" : "")">Home</a>
                 <a href="/routes" class="nav-link @(IsActive("/routes") ? "active" : "")">Routes</a>
             </div>
             <div class="app-info">
@@ -26,6 +28,10 @@
         </div>
 
         <article class="content px-4">
+            @if (ShowApiKeyPrompt)
+            {
+                <CycleRoutes.Shared.Components.ApiKeyPrompt />
+            }
             @Body
         </article>
     </main>
@@ -38,6 +44,8 @@
 </div>
 
 @code {
+    private bool ShowApiKeyPrompt => !GoogleMapsService.HasApiKey || !StreetViewService.HasApiKey || CycleRoutes.Shared.Components.ApiKeyPromptService.ShowPrompt;
+
     protected override async Task OnInitializedAsync()
     {
         await ThemeService.InitializeAsync();

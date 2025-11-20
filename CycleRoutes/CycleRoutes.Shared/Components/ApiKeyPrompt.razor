@@ -1,0 +1,65 @@
+@inject CycleRoutes.Shared.Services.IGoogleMapsService GoogleMapsService
+@inject CycleRoutes.Shared.Services.IStreetViewService StreetViewService
+
+@if (ApiKeyPromptService.ShowPrompt)
+{
+    <div class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enter Google Maps API Key</h5>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        This sample app requires a Google Maps API key for map and Street View features.<br />
+                        Enter your key below (not stored, only used for this session):
+                    </p>
+                    <input type="text" class="form-control" @bind="apiKey" placeholder="Google Maps API Key" />
+                    @if (!string.IsNullOrEmpty(statusMessage))
+                    {
+                        <div class="mt-2 alert alert-info">@statusMessage</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="SetApiKey" disabled="@(string.IsNullOrWhiteSpace(apiKey))">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string apiKey = string.Empty;
+    private string statusMessage = string.Empty;
+
+    private async Task SetApiKey()
+    {
+        GoogleMapsService.SetApiKey(apiKey);
+        StreetViewService.SetApiKey(apiKey);
+        statusMessage = "Validating API key...";
+        StateHasChanged();
+        var valid = await GoogleMapsService.ValidateApiKeyAsync();
+        statusMessage = valid ? "API key is valid!" : "API key is invalid or not enabled for Maps.";
+        if (valid)
+        {
+            // Hide modal after short delay
+            await Task.Delay(800);
+            ApiKeyPromptService.HidePrompt();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        ApiKeyPromptService.OnShowPrompt += OnShowPromptHandler;
+    }
+
+    private void OnShowPromptHandler()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ApiKeyPromptService.OnShowPrompt -= OnShowPromptHandler;
+    }
+}

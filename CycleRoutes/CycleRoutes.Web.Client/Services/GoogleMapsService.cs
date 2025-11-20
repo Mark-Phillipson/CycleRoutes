@@ -19,113 +19,60 @@ public class GoogleMapsService : IGoogleMapsService
     {
         _configuration = configuration;
         _httpClient = httpClient;
-        
-        // Try to get API key from local configuration first (for WASM)
-        _apiKey = _configuration["GoogleMaps:ApiKey"];
+        // Do not load API key from config anymore
+        _apiKey = null;
+    }
+
+    // Allow setting API key at runtime
+    public void SetApiKey(string key)
+    {
+        _apiKey = key;
+        _apiKeyValidated = null;
+        _apiUrl = null;
+        _configurationLoaded = true;
     }
 
     private async Task EnsureConfigurationLoadedAsync()
     {
         if (_configurationLoaded)
             return;
-
-        try
-        {
-            // If we don't have a local API key, try to fetch from the server
-            if (string.IsNullOrEmpty(_apiKey))
-            {
-                var response = await _httpClient.GetAsync("api/configuration/google-maps");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    using var document = JsonDocument.Parse(content);
-                    
-                    var hasApiKey = document.RootElement.GetProperty("hasApiKey").GetBoolean();
-                    if (hasApiKey)
-                    {
-                        _apiUrl = document.RootElement.GetProperty("apiUrl").GetString();
-                        // Extract API key from URL for validation purposes
-                        if (!string.IsNullOrEmpty(_apiUrl))
-                        {
-                            var keyIndex = _apiUrl.IndexOf("key=");
-                            if (keyIndex >= 0)
-                            {
-                                var keyStart = keyIndex + 4;
-                                var keyEnd = _apiUrl.IndexOf("&", keyStart);
-                                _apiKey = keyEnd >= 0 ? _apiUrl.Substring(keyStart, keyEnd - keyStart) : _apiUrl.Substring(keyStart);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception)
-        {
-            // If we can't fetch configuration, we'll work with what we have
-        }
-        finally
-        {
-            _configurationLoaded = true;
-        }
+        // No longer load from config or server
+        _configurationLoaded = true;
     }
 
     public bool HasApiKey => !string.IsNullOrEmpty(_apiKey);
 
     public string GetMapsApiUrl()
     {
-        // Use the full API URL if we fetched it from the server
-        if (!string.IsNullOrEmpty(_apiUrl))
-        {
-            // Ensure geometry library is included
-            var url = _apiUrl;
-            if (!url.Contains("libraries="))
-            {
-                url += "&libraries=geometry";
-            }
-            else if (!url.Contains("geometry"))
-            {
-                url = url.Replace("libraries=", "libraries=geometry,");
-            }
-            return url + "&callback=initGoogleMaps";
-        }
-            
         if (!HasApiKey)
             return string.Empty;
-        
         return $"https://maps.googleapis.com/maps/api/js?key={_apiKey}&libraries=geometry&callback=initGoogleMaps&loading=async";
     }
 
     public async Task<bool> ValidateApiKeyAsync()
     {
         await EnsureConfigurationLoadedAsync();
-        
         if (!HasApiKey)
         {
             _apiKeyValidated = false;
             return false;
         }
-
         if (_apiKeyValidated.HasValue)
         {
             return _apiKeyValidated.Value;
         }
-
         try
         {
-            // Test the API key with a simple geocoding request
             var testUrl = $"https://maps.googleapis.com/maps/api/geocode/json?address=London&key={_apiKey}";
             var response = await _httpClient.GetAsync(testUrl);
-            
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
                 using var document = JsonDocument.Parse(content);
                 var status = document.RootElement.GetProperty("status").GetString();
-                
                 _apiKeyValidated = status == "OK";
                 return _apiKeyValidated.Value;
             }
-            
             _apiKeyValidated = false;
             return false;
         }
@@ -140,10 +87,8 @@ public class GoogleMapsService : IGoogleMapsService
     {
         if (!HasApiKey)
             return "No API key configured";
-        
         if (!_apiKeyValidated.HasValue)
             return "API key not yet validated";
-            
         return _apiKeyValidated.Value ? "API key is valid" : "API key is invalid or lacks required permissions";
     }
 
@@ -154,7 +99,6 @@ public class GoogleMapsService : IGoogleMapsService
 
         var currentPoint = route.Points[Math.Min(currentPointIndex, route.Points.Count - 1)];
         var pathPoints = route.Points.Select(p => $"{{lat: {p.Latitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)}, lng: {p.Longitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)}}}");
-        
         var script = new StringBuilder();
         script.AppendLine($@"
 function initializeMap_{mapElementId}() {{
