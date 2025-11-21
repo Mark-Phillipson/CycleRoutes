@@ -19,8 +19,16 @@ public class GoogleMapsService : IGoogleMapsService
     {
         _configuration = configuration;
         _httpClient = httpClient;
-        // Do not load API key from config anymore
-        _apiKey = null;
+        // If running in development, load API key from config
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+        if (environment == "Development")
+        {
+            _apiKey = _configuration["GoogleMaps:ApiKey"];
+        }
+        else
+        {
+            _apiKey = null;
+        }
     }
 
     // Allow setting API key at runtime
@@ -36,7 +44,6 @@ public class GoogleMapsService : IGoogleMapsService
     {
         if (_configurationLoaded)
             return;
-        // No longer load from config or server
         _configurationLoaded = true;
     }
 

@@ -1,4 +1,5 @@
 using CycleRoutes.Shared.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace CycleRoutes.Web.Client.Services;
 
@@ -7,10 +8,19 @@ public class StreetViewService : IStreetViewService
     private readonly HttpClient _httpClient;
     private string? _apiKey;
 
-    public StreetViewService(HttpClient httpClient)
+    public StreetViewService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
-        _apiKey = null;
+        // If running in development, load API key from config
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+        if (environment == "Development")
+        {
+            _apiKey = configuration["GoogleMaps:ApiKey"];
+        }
+        else
+        {
+            _apiKey = null;
+        }
     }
 
     // Allow setting API key at runtime
